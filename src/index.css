@@ -262,3 +262,150 @@ body {
 .kf-inset-ring {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 1px 0 rgba(0,0,0,0.2);
 }
+
+/* ===========================================================
+   Onboarding – AI Companion experience
+   =========================================================== */
+
+@keyframes kf-data-flow {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+@keyframes kf-bar-fill {
+  from { width: 0%; }
+  to   { width: var(--kf-bar-end, 100%); }
+}
+
+@keyframes kf-count-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes kf-ai-think {
+  0%, 100% { opacity: .4; }
+  50%      { opacity: 1; }
+}
+
+@keyframes kf-neon-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(139,92,246,0), 0 0 28px -4px rgba(139,92,246,0.5); }
+  50%      { box-shadow: 0 0 0 6px rgba(139,92,246,0.08), 0 0 60px -4px rgba(139,92,246,0.8); }
+}
+
+@keyframes kf-step-pop {
+  0%   { transform: scale(0.85); opacity: 0; }
+  60%  { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+@keyframes kf-timeline-trace {
+  from { stroke-dashoffset: 100; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* Animated indigo→violet data line (used in copilot panel & dividers) */
+.kf-data-line {
+  background: linear-gradient(90deg,
+    rgba(99,102,241,0) 0%,
+    rgba(139,92,246,0.9) 50%,
+    rgba(236,72,153,0.6) 70%,
+    rgba(99,102,241,0) 100%);
+  background-size: 200% 100%;
+  animation: kf-data-flow 3.2s linear infinite;
+}
+
+/* Animated bar that fills on mount */
+.kf-bar-fill { animation: kf-bar-fill 1.6s cubic-bezier(.2,.7,.2,1) forwards; }
+
+/* AI-thinking text fade */
+.kf-think { animation: kf-ai-think 1.8s ease-in-out infinite; }
+
+/* Neon ring glow on hover for premium dark cards */
+.kf-neon { animation: kf-neon-glow 3.2s ease-in-out infinite; }
+
+/* Subtle pop-in for sequential steps */
+.kf-pop { animation: kf-step-pop .55s cubic-bezier(.2,.9,.2,1) both; }
+
+/* Glass for dark onboarding cards */
+.kf-glass {
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+}
+
+/* Subtle grid background used by onboarding canvas */
+.kf-ops-grid {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.035) 1px, transparent 0);
+  background-size: 28px 28px;
+}
+
+/* Soft top-fade so the dark canvas blends with surroundings */
+.kf-canvas-fade::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(99,102,241,0.18), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 30%, rgba(236,72,153,0.12), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 20% 70%, rgba(16,185,129,0.10), transparent 60%);
+}
+
+/* Animated dashed border (machine status etc.) */
+.kf-dashed-anim {
+  background-image: linear-gradient(90deg, rgba(255,255,255,0.25) 50%, transparent 50%);
+  background-size: 10px 1px;
+  background-repeat: repeat-x;
+  background-position: 0 100%;
+  animation: kf-data-flow 4s linear infinite;
+}
+
+/* ===========================================================
+   Onboarding v2 – Holy-Shit moment polish
+   =========================================================== */
+
+@keyframes kf-toast-in {
+  0%   { opacity: 0; transform: translateY(-10px) scale(0.96); filter: blur(4px); }
+  60%  { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0)     scale(1);    filter: blur(0); }
+}
+
+@keyframes kf-toast-content-swap {
+  0%   { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes kf-breath {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0),    0 30px 80px -20px rgba(99,102,241,0.25); }
+  50%      { box-shadow: 0 0 0 8px rgba(99,102,241,0.05), 0 35px 90px -20px rgba(99,102,241,0.45); }
+}
+
+@keyframes kf-result-wipe {
+  0%   { clip-path: inset(0 100% 0 0); opacity: 0; }
+  100% { clip-path: inset(0 0 0 0);    opacity: 1; }
+}
+
+@keyframes kf-anchor-pulse {
+  0%, 100% { opacity: .55; transform: translateX(-2px); }
+  50%      { opacity: 1;   transform: translateX(2px);  }
+}
+
+@keyframes kf-cta-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0), 0 10px 30px -10px rgba(139,92,246,0.5); }
+  50%      { box-shadow: 0 0 0 4px rgba(139,92,246,0.18), 0 18px 40px -10px rgba(139,92,246,0.7); }
+}
+
+@keyframes kf-step-tick {
+  0%   { opacity: 0; transform: translateX(-6px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.kf-toast-in            { animation: kf-toast-in .55s cubic-bezier(.2,.9,.2,1) both; }
+.kf-toast-content-swap  { animation: kf-toast-content-swap .45s cubic-bezier(.2,.9,.2,1) both; }
+.kf-breath              { animation: kf-breath 4.4s ease-in-out infinite; }
+.kf-result-wipe         { animation: kf-result-wipe .8s cubic-bezier(.2,.7,.2,1) both; }
+.kf-anchor-pulse        { animation: kf-anchor-pulse 1.8s ease-in-out infinite; }
+.kf-cta-glow            { animation: kf-cta-glow 3.2s ease-in-out infinite; }
+.kf-step-tick           { animation: kf-step-tick .45s cubic-bezier(.2,.9,.2,1) both; }

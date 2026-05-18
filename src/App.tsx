@@ -57,6 +57,13 @@ import {
   Eye,
   Hourglass,
   Radar,
+  Lock,
+  Compass,
+  MapPin,
+  HelpCircle,
+  CircleDot,
+  Sparkle,
+  Volume2,
 } from 'lucide-react'
 
 /* ============================================================================
@@ -117,7 +124,6 @@ interface OnboardingDay {
 
 // ---------- Assistant chat types --------------------------------------------
 
-type RiskLevel = 'low' | 'medium' | 'high'
 
 interface SourceRef {
   expertName: string
@@ -2796,6 +2802,160 @@ function SOPBlock({
 
 // ---------- 5) Onboarding ---------------------------------------------------
 
+/* ============================================================================
+ * ONBOARDING — Tag 1 mit KI-Begleitung
+ * Dark "Operations Mode" canvas inside the light app shell.
+ * Narrative arc: Willkommen → Orientierung → Lernen → Sicherheit → Mentor → Produktivität
+ * ========================================================================== */
+
+type StepStatus = 'done' | 'active' | 'next' | 'locked'
+type StepType = 'safety' | 'orientation' | 'training' | 'sop' | 'shadow' | 'practice' | 'review'
+type RiskLevel = 'low' | 'medium' | 'high' | 'critical'
+
+interface DayStep {
+  id: string
+  time: string
+  duration: string
+  type: StepType
+  title: string
+  subtitle: string
+  location: string
+  mentor?: string
+  machine?: string
+  risk: RiskLevel
+  status: StepStatus
+  aiInsight?: string
+  modules?: number
+}
+
+const ONBOARDING_EMPLOYEE = {
+  name: 'Lukas Brandt',
+  initials: 'LB',
+  role: 'Maschinenbediener i. A.',
+  shift: 'Frühschicht · 06:00 – 14:30',
+  area: 'CNC-Fertigung · Halle B',
+  startDate: '11.05.2026',
+  dayNumber: 1,
+  totalDays: 9,
+  tasksDone: 4,
+  tasksTotal: 7,
+  productivityWith: 9,
+  productivityWithout: 14,
+}
+
+const ONBOARDING_MENTOR = {
+  name: 'Heinz Müller',
+  initials: 'HM',
+  role: 'Senior CNC-Programmierer',
+  yearsExp: 28,
+  retiresIn: '4 Monate',
+  knowledgeEntries: 142,
+}
+
+const STEP_TYPE_META: Record<StepType, { label: string; icon: JSX.Element; tint: string; chip: string }> = {
+  safety:      { label: 'Sicherheit',     icon: <ShieldAlert size={13} />,  tint: 'from-rose-500/15 to-rose-500/0',     chip: 'text-rose-300 bg-rose-500/10 border-rose-500/20' },
+  orientation: { label: 'Orientierung',   icon: <Compass size={13} />,      tint: 'from-sky-500/15 to-sky-500/0',       chip: 'text-sky-300 bg-sky-500/10 border-sky-500/20' },
+  training:    { label: 'Training',       icon: <BookOpen size={13} />,     tint: 'from-indigo-500/15 to-indigo-500/0', chip: 'text-indigo-300 bg-indigo-500/10 border-indigo-500/20' },
+  sop:         { label: 'SOP',            icon: <FileText size={13} />,     tint: 'from-violet-500/15 to-violet-500/0', chip: 'text-violet-300 bg-violet-500/10 border-violet-500/20' },
+  shadow:      { label: 'Schattenarbeit', icon: <Eye size={13} />,          tint: 'from-fuchsia-500/15 to-fuchsia-500/0', chip: 'text-fuchsia-300 bg-fuchsia-500/10 border-fuchsia-500/20' },
+  practice:    { label: 'Praxis',         icon: <Wrench size={13} />,       tint: 'from-amber-500/15 to-amber-500/0',   chip: 'text-amber-300 bg-amber-500/10 border-amber-500/20' },
+  review:      { label: 'Review',         icon: <CheckCircle2 size={13} />, tint: 'from-emerald-500/15 to-emerald-500/0', chip: 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20' },
+}
+
+const RISK_META: Record<RiskLevel, { label: string; cls: string }> = {
+  low:      { label: 'Risiko niedrig',  cls: 'text-zinc-300 bg-white/5 border-white/10' },
+  medium:   { label: 'Risiko mittel',   cls: 'text-amber-300 bg-amber-500/10 border-amber-500/20' },
+  high:     { label: 'Risiko hoch',     cls: 'text-orange-300 bg-orange-500/10 border-orange-500/20' },
+  critical: { label: 'Risiko kritisch', cls: 'text-rose-300 bg-rose-500/10 border-rose-500/20' },
+}
+
+const DAY_STEPS: DayStep[] = [
+  { id: 's1', time: '06:00', duration: '15 min', type: 'safety',     title: 'Werks-Sicherheits-Briefing',  subtitle: 'PSA, Fluchtwege, NOT-AUS-Stellen', location: 'Halle B · Eingang',  mentor: 'Sicherheitsbeauftragter', risk: 'high',     status: 'done', modules: 3 },
+  { id: 's2', time: '06:30', duration: '45 min', type: 'orientation', title: 'Werksrundgang & Arbeitsplatz', subtitle: 'Halle B kennen, Schichtteam treffen', location: 'Halle B',          mentor: 'Heinz Müller',           risk: 'low',      status: 'done', modules: 2 },
+  { id: 's3', time: '07:30', duration: '30 min', type: 'training',    title: 'Einführung CNC-200',           subtitle: 'Bedienpanel, Spindel, Werkzeugwechsler', location: 'CNC-200',     mentor: 'Heinz Müller',           machine: 'CNC-200', risk: 'medium', status: 'done', modules: 4 },
+  { id: 's4', time: '08:15', duration: '20 min', type: 'sop',         title: 'SOP-Lagerwechsel CNC-200',     subtitle: 'Auditierbare Schritte, Sicherheitsregeln', location: 'Schulungsraum', risk: 'critical', status: 'done', modules: 1 },
+  { id: 's5', time: '09:00', duration: '60 min', type: 'shadow',      title: 'Schattenarbeit mit Heinz',     subtitle: 'Realer Auftrag · Aluminium-Werkstück', location: 'CNC-200',         mentor: 'Heinz Müller',           machine: 'CNC-200', risk: 'medium', status: 'active',  modules: 0, aiInsight: 'KI begleitet — typische Anfängerfehler werden in Echtzeit erkannt.' },
+  { id: 's6', time: '10:30', duration: '45 min', type: 'practice',    title: 'Erste eigenständige Übung',    subtitle: 'Einfaches NC-Programm laden & starten', location: 'CNC-200',          machine: 'CNC-200', risk: 'medium', status: 'next',     modules: 2 },
+  { id: 's7', time: '12:00', duration: '30 min', type: 'review',      title: 'Tagesabschluss mit Mentor',    subtitle: 'Lukas erzählt, KI fasst Lernfortschritt zusammen', location: 'Schulungsraum', mentor: 'Heinz Müller', risk: 'low', status: 'next', modules: 1 },
+]
+
+interface TrainingModule {
+  id: string
+  kind: 'video' | 'sop' | 'quiz' | 'experience' | 'machine'
+  title: string
+  duration: string
+  diff: string
+  done: boolean
+  tone: 'indigo' | 'violet' | 'emerald' | 'fuchsia' | 'amber'
+  excerpt: string
+}
+
+const ONBOARDING_TRAININGS: TrainingModule[] = [
+  { id: 't1', kind: 'video',      title: 'CNC-200 Sicherheits-Crashkurs', duration: '8 min',  diff: 'Einsteiger',     done: true,  tone: 'indigo',  excerpt: 'Spindel-Sicherheit, Tür-Sensor, NOT-AUS, Kühlmittel.' },
+  { id: 't2', kind: 'sop',        title: 'SOP · Lagerwechsel Schritt-für-Schritt', duration: '12 min', diff: 'Mittel', done: true,  tone: 'violet',  excerpt: '11 Schritte · 3 Sicherheits-Regeln · audit-trail.' },
+  { id: 't3', kind: 'quiz',       title: 'Sicherheits-Quiz · Halle B',    duration: '5 min',  diff: 'Einsteiger',     done: false, tone: 'emerald', excerpt: '8 Fragen · 80 % bestanden zum Abschluss.' },
+  { id: 't4', kind: 'experience', title: 'Heinz erzählt · 28 Jahre CNC',  duration: '15 min', diff: 'Erfahrungswissen', done: false, tone: 'fuchsia', excerpt: 'Audio-Mitschnitt · 6 typische Eigenheiten der CNC-200.' },
+  { id: 't5', kind: 'machine',    title: 'Maschinen-Eigenheiten CNC-200', duration: '6 min',  diff: 'Fortgeschritten', done: false, tone: 'amber',   excerpt: 'Geräusch-Signaturen · Wartungs-Symptome.' },
+]
+
+const AI_THINKING_LINES = [
+  'Analysiere aktuellen Lernfortschritt von Lukas',
+  'Vergleiche mit Erfahrungswissen von 12 Senior-Operatoren',
+  'Erkenne Risikomuster: Lager-Vorspannung',
+  'Verknüpfe SOP-Schritt mit historischen Anfänger-Fehlern',
+  'Empfehlung generiert · Konfidenz 92 %',
+]
+
+type AIResultTone = 'amber' | 'rose' | 'indigo'
+const AI_RESULTS: { kind: string; title: string; detail: string; tone: AIResultTone }[] = [
+  {
+    kind: 'Empfehlung generiert',
+    title: 'Schattenarbeit mit Heinz an CNC-200',
+    detail: 'Lukas profitiert jetzt am stärksten von 25 Min. Beobachtung statt Theorie.',
+    tone: 'amber',
+  },
+  {
+    kind: 'Risiko erkannt',
+    title: 'Lager-Vorspannung zu hoch (häufiger Anfängerfehler)',
+    detail: '3 historische Vorfälle in Halle B · präventiver SOP-Check eingeblendet.',
+    tone: 'rose',
+  },
+  {
+    kind: 'Wissen verknüpft',
+    title: '14 Erfahrungs­einträge mit heutigem Lernziel verbunden',
+    detail: 'Inkl. Heinz #142 zu Spindel-Geräuschen · Konfidenz 92 %.',
+    tone: 'indigo',
+  },
+]
+
+const MENTOR_TIPS = [
+  { text: 'Achte beim Anfahren auf das Geräusch der Spindel. Wenn es metallisch klingelt — sofort stoppen.', tag: 'Akustik-Diagnose' },
+  { text: 'Niemals nach einem Lagerwechsel mit voller Last starten. Erst 10 Min. einlaufen lassen.', tag: 'Lagerwechsel' },
+  { text: 'Kühlmittel-Druck immer prüfen, bevor die Spindel hochfährt — mindestens 14 bar.', tag: 'Kühlung' },
+]
+
+const TYPICAL_MISTAKES = [
+  { mistake: 'Werkstück manuell prüfen, während die Spindel noch rotiert.',  fix: 'Spindel-Stopp + Tür-Verriegelung abwarten.' },
+  { mistake: 'Mit voller Schnitttiefe nach dem Lagerwechsel starten.',       fix: 'Einlauf­programm mit 30 % Vorschub fahren.' },
+  { mistake: 'Geräusch-Veränderung der Spindel ignorieren.',                  fix: 'Bei Klingeln/Klopfen sofort NOT-AUS auslösen.' },
+]
+
+const COPILOT_QA = {
+  question: 'Warum vibriert CNC-200 nach Lagerwechsel?',
+  diagnose: 'Lager nicht korrekt eingelaufen — Vorspannung zu hoch',
+  cause: 'Beim Tausch wurde das Spindellager zu stark vorgespannt. Das Lager läuft nicht spielfrei und erzeugt Resonanz bei mittleren Drehzahlen.',
+  steps: [
+    'Spindel kontrolliert abschalten (kein NOT-AUS).',
+    'CNC-200 in Service-Modus versetzen.',
+    'Lager-Vorspannung mit Drehmoment­schlüssel auf 18 Nm reduzieren.',
+    '10 Min. Einlauf­programm mit 30 % Vorschub fahren.',
+    'Vibration mit Diagnose-App messen — Ziel < 1,2 mm/s.',
+  ],
+  safety: 'Vor Arbeit am Spindelkopf: Hauptschalter aus, Verriegelung anbringen.',
+  source: { entry: '#142 · Heinz Müller', date: '04.05.2026' },
+  confidence: 92,
+}
+
 function Onboarding({
   days,
   setDays,
@@ -2803,90 +2963,1238 @@ function Onboarding({
   days: OnboardingDay[]
   setDays: (d: OnboardingDay[]) => void
 }) {
-  const progress = Math.round(
-    (days.filter((d) => d.done).length / days.length) * 100,
+  const [activeStepId, setActiveStepId] = useState<string>(
+    DAY_STEPS.find((s) => s.status === 'active')?.id || 's5',
   )
+  const [thinkingIdx, setThinkingIdx] = useState(0)
+  const [thinkingPhase, setThinkingPhase] = useState<'running' | 'result'>('running')
+  const [resultIdx, setResultIdx] = useState(0)
+  const [qaState, setQaState] = useState<'idle' | 'thinking' | 'answered'>('idle')
+  const aiTimersRef = useRef<number[]>([])
 
-  function toggleDay(day: number) {
-    setDays(days.map((d) => (d.day === day ? { ...d, done: !d.done } : d)))
+  // Progressive AI thinking: step 0 → 1 → 2 → 3 → 4 → result reveal → restart
+  useEffect(() => {
+    function clearTimers() {
+      aiTimersRef.current.forEach((id) => window.clearTimeout(id))
+      aiTimersRef.current = []
+    }
+    function runCycle(rotate: number) {
+      clearTimers()
+      setThinkingPhase('running')
+      setThinkingIdx(0)
+      // Walk through each thinking line
+      for (let step = 1; step < AI_THINKING_LINES.length; step++) {
+        const id = window.setTimeout(() => setThinkingIdx(step), step * 1600)
+        aiTimersRef.current.push(id)
+      }
+      // After last step, show result
+      const resultDelay = AI_THINKING_LINES.length * 1600 + 600
+      const showResult = window.setTimeout(() => {
+        setResultIdx(rotate % AI_RESULTS.length)
+        setThinkingPhase('result')
+      }, resultDelay)
+      aiTimersRef.current.push(showResult)
+      // After result is displayed for ~4.6s, restart cycle
+      const restart = window.setTimeout(() => runCycle(rotate + 1), resultDelay + 4600)
+      aiTimersRef.current.push(restart)
+    }
+    runCycle(0)
+    return clearTimers
+  }, [])
+
+  const activeStep = DAY_STEPS.find((s) => s.id === activeStepId) || DAY_STEPS[4]
+  const completed = DAY_STEPS.filter((s) => s.status === 'done').length
+  const total = DAY_STEPS.length
+  const progressPct = Math.round((completed / total) * 100)
+
+  function askCopilot() {
+    if (qaState !== 'idle') return
+    setQaState('thinking')
+    window.setTimeout(() => setQaState('answered'), 1800)
+  }
+  function resetCopilot() {
+    setQaState('idle')
+  }
+
+  // Use `days` so it's not unused (clicking the day strip can mark milestone done)
+  function toggleMilestone(dayNum: number) {
+    setDays(days.map((d) => (d.day === dayNum ? { ...d, done: !d.done } : d)))
   }
 
   return (
-    <div>
-      <SectionHeader
-        title="Onboarding-Lernpfad"
-        subtitle="Strukturierter 5-Tage-Plan für neue Mitarbeiter – generiert aus Ihrem KnowFlow-Wissen."
-        actions={
-          <Button variant="secondary">
-            <Plus size={16} /> Neuen Mitarbeiter anlegen
-          </Button>
+    <div className="relative -mt-2">
+      {/* Dark canvas wrapper */}
+      <div className="relative rounded-3xl overflow-hidden border border-zinc-800/80 bg-zinc-950 text-zinc-100 kf-canvas-fade">
+        {/* Background grid + aurora */}
+        <div className="absolute inset-0 kf-ops-grid pointer-events-none opacity-60" />
+        <div className="kf-aurora bg-indigo-600/30" style={{ top: -100, left: '10%', width: 460, height: 460 }} />
+        <div className="kf-aurora bg-fuchsia-600/25" style={{ top: 220, right: '8%', width: 480, height: 480, animationDelay: '3s' }} />
+
+        <div className="relative p-6 lg:p-10">
+          {/* 1 · HERO */}
+          <OnboardingHero progressPct={progressPct} completed={completed} total={total} />
+
+          {/* 2 · DAY STRIP (high-level milestones from `days` prop) */}
+          <DayStripMilestones days={days} onToggle={toggleMilestone} />
+
+          {/* 3 · MAIN GRID — Tagesplan + Copilot Panel */}
+          <div className="mt-10 grid grid-cols-1 xl:grid-cols-12 gap-6">
+            <div className="xl:col-span-8">
+              <DayPlan activeStepId={activeStepId} onPick={setActiveStepId} activeStep={activeStep} />
+            </div>
+            <div className="xl:col-span-4">
+              <CopilotPanel activeStep={activeStep} />
+            </div>
+          </div>
+
+          {/* 4 · TRAININGS */}
+          <TrainingsRow />
+
+          {/* 5+6 · LIVE-KI + MENTOR-WISSEN */}
+          <div className="mt-10 grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <LiveAIAnalysis thinkingIdx={thinkingIdx} phase={thinkingPhase} result={AI_RESULTS[resultIdx]} />
+            <MentorWisdom />
+          </div>
+
+          {/* 7 · PRODUKTIVITÄTS-TIMELINE */}
+          <ProductivityTimeline />
+
+          {/* 8 · KI-ASSISTENT */}
+          <CopilotQABox state={qaState} onAsk={askCopilot} onReset={resetCopilot} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ---------------------------- 1 · HERO ----------------------------------- */
+
+/* Live AI insight toast — appears 800 ms after mount, rotates every 4.5 s.
+ * Goal: immediate "holy-shit, the AI is actually working" moment. */
+
+const LIVE_AI_INSIGHTS = [
+  {
+    tag: 'Risiko erkannt',
+    text: 'KnowFlow hat ein typisches Risiko an CNC-200 erkannt',
+    icon: <AlertTriangle size={13} />,
+    tone: 'rose' as const,
+  },
+  {
+    tag: 'Personalisierung',
+    text: "Heinz' Erfahrungswissen wurde für Lukas personalisiert",
+    icon: <Brain size={13} />,
+    tone: 'fuchsia' as const,
+  },
+  {
+    tag: 'Prävention',
+    text: '3 typische Anfängerfehler wurden präventiv abgesichert',
+    icon: <ShieldCheck size={13} />,
+    tone: 'emerald' as const,
+  },
+]
+
+const TOAST_TONE: Record<'rose' | 'fuchsia' | 'emerald', { tag: string; icon: string; dot: string }> = {
+  rose:    { tag: 'text-rose-300 bg-rose-500/15 border-rose-400/30',       icon: 'text-rose-300 bg-rose-500/15',       dot: 'bg-rose-400' },
+  fuchsia: { tag: 'text-fuchsia-300 bg-fuchsia-500/15 border-fuchsia-400/30', icon: 'text-fuchsia-300 bg-fuchsia-500/15', dot: 'bg-fuchsia-400' },
+  emerald: { tag: 'text-emerald-300 bg-emerald-500/15 border-emerald-400/30', icon: 'text-emerald-300 bg-emerald-500/15', dot: 'bg-emerald-400' },
+}
+
+function LiveAIInsightToast() {
+  const [mounted, setMounted] = useState(false)
+  const [idx, setIdx] = useState(0)
+
+  useEffect(() => {
+    const t = window.setTimeout(() => setMounted(true), 800)
+    return () => window.clearTimeout(t)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+    const i = window.setInterval(() => {
+      setIdx((n) => (n + 1) % LIVE_AI_INSIGHTS.length)
+    }, 4500)
+    return () => window.clearInterval(i)
+  }, [mounted])
+
+  const it = LIVE_AI_INSIGHTS[idx]
+  const t = TOAST_TONE[it.tone]
+
+  return (
+    <div className={cls('mb-5 transition-all duration-500', mounted ? 'kf-toast-in' : 'opacity-0 -translate-y-2 pointer-events-none')}>
+      <div className="inline-flex max-w-full items-center gap-3 pl-2.5 pr-4 py-2 rounded-full border border-white/10 bg-white/[0.04] backdrop-blur-md shadow-[0_10px_40px_-10px_rgba(99,102,241,0.4)] relative overflow-hidden">
+        {/* subtle scan line */}
+        <span className="absolute inset-y-0 left-0 w-[2px] bg-gradient-to-b from-indigo-400 via-violet-400 to-fuchsia-400" />
+        {/* icon */}
+        <span className={cls('relative h-7 w-7 rounded-full flex items-center justify-center shrink-0', t.icon)}>
+          {it.icon}
+          <span className={cls('absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full', t.dot)}>
+            <span className={cls('absolute inset-0 rounded-full animate-ping opacity-75', t.dot)} />
+          </span>
+        </span>
+
+        {/* rotating content (key forces remount → fresh animation) */}
+        <div key={idx} className="kf-toast-content-swap flex items-center gap-2.5 min-w-0">
+          <span className={cls('text-[10px] font-semibold uppercase tracking-[0.14em] px-1.5 py-0.5 rounded-full border', t.tag)}>
+            {it.tag}
+          </span>
+          <span className="text-[13px] text-zinc-100 truncate">{it.text}</span>
+        </div>
+
+        {/* progress dots */}
+        <span className="ml-2 hidden sm:flex items-center gap-1 shrink-0">
+          {LIVE_AI_INSIGHTS.map((_, i) => (
+            <span
+              key={i}
+              className={cls(
+                'h-1 rounded-full transition-all',
+                i === idx ? 'w-4 bg-zinc-200' : 'w-1 bg-zinc-600',
+              )}
+            />
+          ))}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function OnboardingHero({ progressPct, completed, total }: { progressPct: number; completed: number; total: number }) {
+  const e = ONBOARDING_EMPLOYEE
+  const m = ONBOARDING_MENTOR
+  return (
+    <div className="relative rounded-2xl overflow-hidden kf-glass p-6 lg:p-8">
+      {/* corner status — consolidated, calmer */}
+      <div className="absolute top-5 right-5">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+          </span>
+          Live · Tag {e.dayNumber}
+        </span>
+      </div>
+
+      {/* 1 · Holy-Shit moment — live AI insight toast */}
+      <LiveAIInsightToast />
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* identity */}
+        <div className="lg:col-span-7 flex items-start gap-5">
+          <div className="relative">
+            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 flex items-center justify-center text-white font-semibold text-lg tracking-wide shadow-lg shadow-indigo-500/40">
+              {e.initials}
+            </div>
+            <span className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-emerald-500 border-2 border-zinc-950 flex items-center justify-center">
+              <CheckCircle2 size={11} className="text-white" />
+            </span>
+          </div>
+          <div className="min-w-0">
+            <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500 font-medium">Willkommen bei Reinhardt Präzisionsbau</div>
+            <h1 className="mt-1 text-3xl lg:text-4xl font-semibold tracking-[-0.02em] text-white leading-tight">
+              Hallo {e.name.split(' ')[0]}.<br />
+              <span className="kf-grad-text">Heute beginnt deine Reise.</span>
+            </h1>
+            {/* 2 · Elevator-pitch one-liner */}
+            <p className="mt-3 max-w-xl text-[13.5px] lg:text-[14px] text-zinc-400 leading-relaxed">
+              KnowFlow verwandelt das Erfahrungswissen deiner Experten in
+              <span className="text-zinc-200"> KI-gestütztes Mitarbeiter-Onboarding</span> —
+              personalisiert, sicher, in Echtzeit.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-[12px]">
+              <HeroChip icon={<Calendar size={12} />} label={`Tag ${e.dayNumber} von ${e.totalDays}`} />
+              <HeroChip icon={<Clock size={12} />} label={e.shift} />
+              <HeroChip icon={<MapPin size={12} />} label={e.area} />
+              <HeroChip icon={<User size={12} />} label={`Mentor · ${m.name}`} tone="violet" />
+            </div>
+          </div>
+        </div>
+
+        {/* KPIs */}
+        <div className="lg:col-span-5 grid grid-cols-3 gap-3">
+          <HeroKpi label="Time-to-Productivity" value="9 T" sub={`statt ${e.productivityWithout} T`} tone="indigo" />
+          <HeroKpi label="Heute erledigt" value={`${completed}/${total}`} sub={`${progressPct}% Fortschritt`} tone="emerald" />
+          <HeroKpi label="Mentor-Wissen" value={`${m.knowledgeEntries}`} sub="Einträge verfügbar" tone="fuchsia" />
+        </div>
+      </div>
+
+      {/* progress strip */}
+      <div className="mt-7">
+        <div className="flex items-center justify-between text-[11px] text-zinc-400 mb-2">
+          <span className="flex items-center gap-1.5">
+            <Target size={11} className="text-indigo-300" /> Tagesziel · Schattenarbeit mit Heinz erfolgreich abschließen
+          </span>
+          <span className="font-medium text-zinc-300">{progressPct}%</span>
+        </div>
+        <div className="relative h-2 rounded-full bg-white/5 overflow-hidden">
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 kf-bar-fill"
+            style={{ ['--kf-bar-end' as never]: `${progressPct}%` }}
+          />
+          <div className="absolute inset-0 kf-data-line opacity-30" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function HeroChip({ icon, label, tone = 'zinc' }: { icon: React.ReactNode; label: string; tone?: 'zinc' | 'violet' }) {
+  const cls = tone === 'violet'
+    ? 'border-violet-500/30 bg-violet-500/10 text-violet-200'
+    : 'border-white/10 bg-white/[0.04] text-zinc-300'
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${cls}`}>
+      <span className="opacity-80">{icon}</span> {label}
+    </span>
+  )
+}
+
+const HERO_KPI_TONES: Record<string, { bar: string; text: string }> = {
+  indigo:  { bar: 'from-indigo-400 to-violet-500',   text: 'text-indigo-200' },
+  emerald: { bar: 'from-emerald-400 to-teal-500',    text: 'text-emerald-200' },
+  fuchsia: { bar: 'from-fuchsia-400 to-pink-500',    text: 'text-fuchsia-200' },
+}
+
+function HeroKpi({ label, value, sub, tone }: { label: string; value: string; sub: string; tone: keyof typeof HERO_KPI_TONES }) {
+  const t = HERO_KPI_TONES[tone]
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] p-3.5">
+      <div className={`absolute top-0 left-0 h-px w-full bg-gradient-to-r ${t.bar}`} />
+      <div className="text-[10px] uppercase tracking-wider text-zinc-500 font-medium">{label}</div>
+      <div className="mt-1 flex items-baseline gap-2">
+        <span className={`text-2xl font-semibold tracking-tight ${t.text}`}>{value}</span>
+        <span className="text-[10px] text-zinc-500">{sub}</span>
+      </div>
+    </div>
+  )
+}
+
+/* -------------------- 2 · DAY STRIP (milestones) ------------------------- */
+
+function DayStripMilestones({ days, onToggle }: { days: OnboardingDay[]; onToggle: (n: number) => void }) {
+  return (
+    <div className="mt-6 relative">
+      <div className="absolute left-0 right-0 top-1/2 h-px kf-data-line opacity-50 pointer-events-none" />
+      <div className="relative overflow-x-auto pb-2">
+        <div className="inline-flex items-center gap-3 min-w-full">
+          {days.map((d) => {
+            const active = d.day === ONBOARDING_EMPLOYEE.dayNumber
+            return (
+              <button
+                key={d.day}
+                onClick={() => onToggle(d.day)}
+                className={cls(
+                  'group relative flex flex-col items-start gap-1 px-3.5 py-2.5 rounded-xl border min-w-[170px] text-left transition',
+                  active
+                    ? 'border-indigo-400/50 bg-gradient-to-br from-indigo-500/15 via-violet-500/10 to-fuchsia-500/15 shadow-lg shadow-indigo-500/20'
+                    : d.done
+                      ? 'border-emerald-500/20 bg-emerald-500/[0.04] hover:bg-emerald-500/[0.08]'
+                      : 'border-white/10 bg-white/[0.02] hover:bg-white/[0.04]',
+                )}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className={cls(
+                    'text-[10px] uppercase tracking-wider font-semibold',
+                    active ? 'text-indigo-200' : d.done ? 'text-emerald-300' : 'text-zinc-500',
+                  )}>
+                    Tag {d.day}
+                  </span>
+                  {d.done && <CheckCircle2 size={11} className="text-emerald-400" />}
+                  {active && (
+                    <span className="ml-1 inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full bg-indigo-400/15 text-indigo-200 border border-indigo-400/30">
+                      <CircleDot size={8} /> heute
+                    </span>
+                  )}
+                </div>
+                <div className={cls('text-[12px] font-medium leading-snug truncate w-full', active ? 'text-white' : 'text-zinc-300')}>
+                  {d.title}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* -------------------------- 3a · DAY PLAN -------------------------------- */
+
+function DayPlan({ activeStepId, onPick, activeStep }: { activeStepId: string; onPick: (id: string) => void; activeStep: DayStep }) {
+  return (
+    <section>
+      <SectionDarkHeader
+        eyebrow="Tagesplan · Tag 1"
+        title="Dein Tag, von der KI orchestriert."
+        right={
+          <span className="hidden lg:inline-flex items-center gap-2 text-[11px] text-zinc-400">
+            <Sparkles size={11} className="text-indigo-300" />
+            7 Schritte · personalisiert für Halle B
+          </span>
         }
       />
 
-      <Card className="p-5 mb-4">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-sky-100 flex items-center justify-center">
-            <User size={22} className="text-sky-600" />
-          </div>
-          <div className="flex-1">
-            <div className="font-semibold text-slate-900">Tom Krüger</div>
-            <div className="text-sm text-slate-500">
-              Maschinenbediener · Start: 11.05.2026 · Mentor: Heinz Müller
-            </div>
-            <div className="mt-2 h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-sky-500 to-indigo-500 rounded-full transition-all"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-semibold text-slate-900">{progress}%</div>
-            <div className="text-xs text-slate-500">Fortschritt</div>
-          </div>
-        </div>
-      </Card>
+      {/* Active step spotlight */}
+      <ActiveStepSpotlight step={activeStep} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
-        {days.map((d) => (
-          <Card
-            key={d.day}
-            className={cls(
-              'p-4 transition-shadow',
-              d.done ? 'bg-emerald-50/50 border-emerald-200' : 'hover:shadow-md',
-            )}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <Badge tone={d.done ? 'emerald' : 'indigo'}>Tag {d.day}</Badge>
-              {d.done ? (
-                <CheckCircle2 size={18} className="text-emerald-600" />
-              ) : (
-                <Clock size={18} className="text-slate-400" />
-              )}
-            </div>
-            <div className="font-semibold text-slate-900 leading-tight">{d.title}</div>
-            <div className="text-xs text-slate-500 mt-1 leading-snug">{d.description}</div>
-
-            <ul className="mt-3 space-y-1.5">
-              {d.topics.map((t) => (
-                <li key={t} className="text-xs flex items-start gap-1.5">
-                  <ChevronRight size={12} className="text-slate-400 mt-0.5 shrink-0" />
-                  <span className="text-slate-700">{t}</span>
-                </li>
-              ))}
-            </ul>
-
-            <Button
-              size="sm"
-              variant={d.done ? 'secondary' : 'primary'}
-              className="w-full mt-3"
-              onClick={() => toggleDay(d.day)}
-            >
-              {d.done ? 'Abgeschlossen' : 'Als erledigt markieren'}
-            </Button>
-          </Card>
+      {/* Step list */}
+      <div className="mt-5 space-y-2.5">
+        {DAY_STEPS.map((s, i) => (
+          <DayPlanRow
+            key={s.id}
+            step={s}
+            index={i + 1}
+            selected={s.id === activeStepId}
+            onClick={() => onPick(s.id)}
+          />
         ))}
       </div>
+    </section>
+  )
+}
+
+function getStepCta(step: DayStep): { label: string; icon: React.ReactNode } {
+  switch (step.type) {
+    case 'shadow':
+      return { label: step.mentor ? `Mit ${step.mentor.split(' ')[0]} starten` : 'Schattenarbeit starten', icon: <Eye size={14} /> }
+    case 'practice':
+      return { label: step.mentor ? `Mit ${step.mentor.split(' ')[0]} praktizieren` : 'Praxis starten', icon: <Wrench size={14} /> }
+    case 'safety':
+      return { label: 'Sicherheits-Check starten', icon: <ShieldAlert size={14} /> }
+    case 'sop':
+      return { label: 'SOP durchgehen', icon: <FileText size={14} /> }
+    case 'training':
+      return { label: 'Training beginnen', icon: <BookOpen size={14} /> }
+    case 'orientation':
+      return { label: 'Rundgang starten', icon: <Compass size={14} /> }
+    case 'review':
+      return { label: 'Review starten', icon: <CheckCircle2 size={14} /> }
+    default:
+      return { label: 'Schritt starten', icon: <PlayCircle size={14} /> }
+  }
+}
+
+function ActiveStepSpotlight({ step }: { step: DayStep }) {
+  const meta = STEP_TYPE_META[step.type]
+  const risk = RISK_META[step.risk]
+  const cta = getStepCta(step)
+  return (
+    <div className="relative mt-4">
+      {/* "Hier startest du" anchor pointer */}
+      <div className="absolute -top-3 left-6 z-10 flex items-center gap-1.5 kf-anchor-pulse">
+        <span className="text-[10px] uppercase tracking-[0.18em] font-semibold text-indigo-300/90 bg-zinc-950 px-2 py-0.5 rounded-full border border-indigo-400/30">
+          Hier startest du
+        </span>
+      </div>
+
+      <div className="relative rounded-2xl overflow-hidden border border-indigo-400/40 bg-gradient-to-br from-indigo-500/[0.14] via-violet-500/[0.07] to-fuchsia-500/[0.11] kf-breath">
+        <div className="kf-scan" style={{ height: '40%' }} />
+      <div className="relative p-5 lg:p-6">
+        <div className="flex flex-wrap items-center gap-2 text-[11px]">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-200 border border-indigo-400/30 font-medium">
+            <span className="h-1.5 w-1.5 rounded-full bg-indigo-300 animate-pulse" /> Aktiver Schritt
+          </span>
+          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border ${meta.chip}`}>
+            {meta.icon} {meta.label}
+          </span>
+          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border ${risk.cls}`}>
+            <ShieldAlert size={11} /> {risk.label}
+          </span>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-white/10 bg-white/5 text-zinc-300">
+            <Clock size={11} /> {step.time} · {step.duration}
+          </span>
+        </div>
+
+        <h3 className="mt-4 text-2xl lg:text-3xl font-semibold tracking-tight text-white">{step.title}</h3>
+        <p className="mt-1.5 text-sm text-zinc-300">{step.subtitle}</p>
+
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <SpotlightFact icon={<MapPin size={13} />} label="Ort" value={step.location} />
+          <SpotlightFact icon={<User size={13} />}    label="Mentor" value={step.mentor || '—'} />
+          <SpotlightFact icon={<Factory size={13} />} label="Maschine" value={step.machine || 'keine'} />
+        </div>
+
+        {step.aiInsight && (
+          <div className="mt-5 flex items-start gap-3 rounded-xl border border-indigo-400/20 bg-indigo-500/[0.06] p-3.5">
+            <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shrink-0">
+              <Bot size={14} className="text-white" />
+            </div>
+            <div className="text-[13px] text-indigo-100/90 leading-relaxed">
+              <span className="font-medium text-white">KnowFlow KI · </span>
+              {step.aiInsight}
+            </div>
+          </div>
+        )}
+
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          <button className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-zinc-900 text-sm font-medium hover:bg-zinc-100 transition kf-cta-glow">
+            {cta.icon} {cta.label}
+          </button>
+          <button className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-white text-sm transition">
+            <FileText size={14} /> SOP öffnen
+          </button>
+          <button className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-white text-sm transition">
+            <HelpCircle size={14} /> {step.mentor ? `Frage an ${step.mentor.split(' ')[0]}` : 'Frage an Mentor'}
+          </button>
+        </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function SpotlightFact({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-zinc-500 font-medium">
+        <span className="text-indigo-300">{icon}</span> {label}
+      </div>
+      <div className="mt-1 text-sm font-medium text-zinc-100 truncate">{value}</div>
+    </div>
+  )
+}
+
+function DayPlanRow({ step, index, selected, onClick }: { step: DayStep; index: number; selected: boolean; onClick: () => void }) {
+  const meta = STEP_TYPE_META[step.type]
+  const isDone = step.status === 'done'
+  const isActive = step.status === 'active'
+  const isLocked = step.status === 'locked'
+
+  return (
+    <button
+      onClick={onClick}
+      className={cls(
+        'group relative w-full text-left flex items-stretch gap-3 rounded-xl border transition kf-pop',
+        selected
+          ? 'border-indigo-400/40 bg-gradient-to-r from-indigo-500/10 via-violet-500/5 to-transparent'
+          : 'border-white/8 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/15',
+      )}
+      style={{ animationDelay: `${index * 50}ms` }}
+    >
+      {/* timeline rail */}
+      <div className="relative flex flex-col items-center justify-start pt-4 pl-4 pr-1">
+        <div className={cls(
+          'relative h-7 w-7 rounded-full flex items-center justify-center border-2 transition shrink-0',
+          isDone   ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
+          : isActive ? 'bg-indigo-500/30 border-indigo-300/60 text-white kf-neon'
+          : isLocked ? 'bg-white/[0.02] border-white/10 text-zinc-600'
+          :            'bg-white/[0.04] border-white/15 text-zinc-400',
+        )}>
+          {isDone ? <CheckCircle2 size={13} /> : isLocked ? <Lock size={11} /> : <span className="text-[10px] font-semibold">{index}</span>}
+        </div>
+        {index < DAY_STEPS.length && (
+          <div className="flex-1 w-px bg-gradient-to-b from-white/15 to-transparent mt-1 mb-3" style={{ minHeight: 28 }} />
+        )}
+      </div>
+
+      <div className="flex-1 py-3.5 pr-4">
+        <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+          <span className="text-zinc-500 tabular-nums">{step.time}</span>
+          <span className="text-zinc-700">·</span>
+          <span className="text-zinc-500">{step.duration}</span>
+          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border ml-1 ${meta.chip}`}>
+            {meta.icon} {meta.label}
+          </span>
+          {step.risk === 'critical' && (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-300">
+              <ShieldAlert size={10} /> kritisch
+            </span>
+          )}
+        </div>
+        <div className={cls(
+          'mt-1 text-[14px] font-medium leading-snug',
+          isDone ? 'text-zinc-400 line-through decoration-zinc-700' : isLocked ? 'text-zinc-500' : 'text-white',
+        )}>
+          {step.title}
+        </div>
+        <div className="mt-0.5 text-[12px] text-zinc-400 truncate">{step.subtitle}</div>
+      </div>
+
+      <div className="flex items-center pr-4">
+        {isActive ? (
+          <span className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-indigo-500/15 border border-indigo-400/30 text-indigo-200 font-medium">
+            <CircleDot size={9} /> läuft
+          </span>
+        ) : isDone ? (
+          <span className="text-[10px] text-emerald-400">+{step.modules || 0} Module</span>
+        ) : (
+          <ChevronRight size={14} className="text-zinc-600 group-hover:text-zinc-300 transition" />
+        )}
+      </div>
+    </button>
+  )
+}
+
+/* -------------------------- 3b · COPILOT PANEL --------------------------- */
+
+function CopilotPanel({ activeStep }: { activeStep: DayStep }) {
+  const meta = STEP_TYPE_META[activeStep.type]
+  return (
+    <aside className="xl:sticky xl:top-6 space-y-4">
+      {/* Header */}
+      <div className="rounded-2xl kf-glass p-4 overflow-hidden relative">
+        <div className="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-indigo-500/30 blur-3xl" />
+        <div className="relative flex items-center gap-3">
+          <div className="relative h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-indigo-500/40 kf-neon">
+            <Bot size={16} className="text-white" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-[10px] uppercase tracking-[0.15em] text-indigo-300 font-semibold">KnowFlow Copilot</div>
+            <div className="text-sm font-medium text-white">Begleitet · {meta.label}</div>
+          </div>
+          <span className="ml-auto inline-flex items-center gap-1 text-[10px] text-emerald-300">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            </span>
+            schaut mit
+          </span>
+        </div>
+      </div>
+
+      <CopilotCard
+        kind="next"
+        icon={<ArrowRight size={13} />}
+        title="Nächster sinnvoller Schritt"
+        body="Du startest gleich die Schattenarbeit an CNC-200. Aktiviere zuerst das Spindel-Diagnose-Display."
+        cta="KI-Begleitung aktivieren"
+      />
+      <CopilotCard
+        kind="warning"
+        icon={<AlertTriangle size={13} />}
+        title="Typischer Anfängerfehler"
+        body="Neue Bediener vergessen oft den Kühlmittel-Druck zu prüfen. Min."
+        accent="14 bar"
+        tail=" vor Schnittbeginn."
+      />
+      <CopilotCard
+        kind="safety"
+        icon={<ShieldCheck size={13} />}
+        title="Sicherheits-Hinweis · live"
+        body="Tür-Sensor wurde am 12.05. erfolgreich geprüft. NOT-AUS am Bedienpanel im Blickfeld halten."
+        chip="OK"
+      />
+      <CopilotCard
+        kind="mentor"
+        icon={<Quote size={13} />}
+        title="Tipp von Heinz"
+        body={`„Achte beim Anfahren auf das Geräusch der Spindel. Wenn es metallisch klingelt — sofort stoppen."`}
+        author={`${ONBOARDING_MENTOR.name} · ${ONBOARDING_MENTOR.yearsExp} J. Erfahrung`}
+      />
+      <CopilotCard
+        kind="machine"
+        icon={<Wrench size={13} />}
+        title="CNC-200 · Maschinenstatus"
+        body="Bereit · letzter Lagerwechsel vor 9 Wochen"
+        metric="Wartung in 14 h"
+      />
+    </aside>
+  )
+}
+
+const COPILOT_KIND: Record<string, { ring: string; icon: string; pill: string }> = {
+  next:    { ring: 'border-indigo-400/20 bg-indigo-500/[0.04]',   icon: 'text-indigo-300 bg-indigo-500/15',  pill: 'bg-indigo-500/15 text-indigo-200 border-indigo-400/30' },
+  warning: { ring: 'border-white/[0.07] bg-amber-500/[0.035]',    icon: 'text-amber-300 bg-amber-500/12',    pill: 'bg-amber-500/15 text-amber-200 border-amber-400/30' },
+  safety:  { ring: 'border-white/[0.07] bg-emerald-500/[0.03]',   icon: 'text-emerald-300 bg-emerald-500/12', pill: 'bg-emerald-500/15 text-emerald-200 border-emerald-400/30' },
+  mentor:  { ring: 'border-white/[0.07] bg-fuchsia-500/[0.03]',   icon: 'text-fuchsia-300 bg-fuchsia-500/12', pill: 'bg-fuchsia-500/15 text-fuchsia-200 border-fuchsia-400/30' },
+  machine: { ring: 'border-white/[0.07] bg-sky-500/[0.03]',       icon: 'text-sky-300 bg-sky-500/12',        pill: 'bg-sky-500/15 text-sky-200 border-sky-400/30' },
+}
+
+function CopilotCard({ kind, icon, title, body, accent, tail, cta, chip, author, metric }: { kind: keyof typeof COPILOT_KIND; icon: React.ReactNode; title: string; body: string; accent?: string; tail?: string; cta?: string; chip?: string; author?: string; metric?: string }) {
+  const c = COPILOT_KIND[kind]
+  return (
+    <div className={`relative rounded-2xl border ${c.ring} p-4 backdrop-blur-sm transition hover:translate-y-[-1px] hover:shadow-lg hover:shadow-black/40`}>
+      <div className="flex items-start gap-3">
+        <div className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 ${c.icon}`}>{icon}</div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[12px] font-semibold text-white">{title}</div>
+            {chip && <span className={`text-[10px] px-1.5 py-0.5 rounded border ${c.pill}`}>{chip}</span>}
+          </div>
+          <p className="mt-1 text-[12.5px] text-zinc-300 leading-relaxed">
+            {body}
+            {accent && <span className="font-semibold text-white"> {accent}</span>}
+            {tail}
+          </p>
+          {author && <div className="mt-2 text-[10.5px] text-zinc-500 italic">— {author}</div>}
+          {metric && (
+            <div className="mt-2 flex items-center gap-2 text-[11px]">
+              <span className={`px-1.5 py-0.5 rounded border ${c.pill} font-medium`}>{metric}</span>
+              <span className="text-zinc-500">geplant</span>
+            </div>
+          )}
+          {cta && (
+            <button className="mt-3 inline-flex items-center gap-1.5 text-[11.5px] font-medium text-white bg-white/10 hover:bg-white/15 border border-white/10 rounded-lg px-2.5 py-1.5 transition">
+              {cta} <ArrowRight size={11} />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------ 4 · TRAININGS ROW ------------------------------ */
+
+function TrainingsRow() {
+  return (
+    <section className="mt-10">
+      <SectionDarkHeader
+        eyebrow="Mini-Trainings · für diesen Schritt"
+        title="Kuratiert von der KI. Maximal 15 Minuten."
+        right={
+          <button className="hidden lg:inline-flex items-center gap-1.5 text-[12px] text-zinc-300 hover:text-white">
+            Alle Module <ArrowRight size={12} />
+          </button>
+        }
+      />
+      <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        {ONBOARDING_TRAININGS.map((t, i) => <TrainingCard key={t.id} t={t} i={i} />)}
+      </div>
+    </section>
+  )
+}
+
+const TRAIN_TONE: Record<TrainingModule['tone'], { from: string; ring: string; ico: string; text: string }> = {
+  indigo:  { from: 'from-indigo-500/15',  ring: 'border-indigo-400/20',  ico: 'text-indigo-300 bg-indigo-500/15',  text: 'text-indigo-300' },
+  violet:  { from: 'from-violet-500/15',  ring: 'border-violet-400/20',  ico: 'text-violet-300 bg-violet-500/15',  text: 'text-violet-300' },
+  emerald: { from: 'from-emerald-500/15', ring: 'border-emerald-400/20', ico: 'text-emerald-300 bg-emerald-500/15', text: 'text-emerald-300' },
+  fuchsia: { from: 'from-fuchsia-500/15', ring: 'border-fuchsia-400/20', ico: 'text-fuchsia-300 bg-fuchsia-500/15', text: 'text-fuchsia-300' },
+  amber:   { from: 'from-amber-500/15',   ring: 'border-amber-400/20',   ico: 'text-amber-300 bg-amber-500/15',   text: 'text-amber-300' },
+}
+
+const TRAIN_KIND_ICON: Record<TrainingModule['kind'], JSX.Element> = {
+  video:      <PlayCircle size={14} />,
+  sop:        <FileText size={14} />,
+  quiz:       <ShieldAlert size={14} />,
+  experience: <Volume2 size={14} />,
+  machine:    <Wrench size={14} />,
+}
+
+const TRAIN_KIND_LABEL: Record<TrainingModule['kind'], string> = {
+  video: 'Video', sop: 'SOP', quiz: 'Quiz', experience: 'Erfahrung', machine: 'Maschine',
+}
+
+function TrainingCard({ t, i }: { t: TrainingModule; i: number }) {
+  const tt = TRAIN_TONE[t.tone]
+  return (
+    <div
+      className={cls(
+        'group relative rounded-2xl border bg-gradient-to-br to-transparent p-4 transition kf-glass kf-pop hover:-translate-y-0.5',
+        tt.from, tt.ring,
+      )}
+      style={{ animationDelay: `${i * 70}ms` }}
+    >
+      <div className="absolute top-0 right-0 m-3">
+        {t.done ? (
+          <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
+            <CheckCircle2 size={10} /> erledigt
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.04] text-zinc-400 border border-white/10">
+            <Clock size={10} /> {t.duration}
+          </span>
+        )}
+      </div>
+      <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${tt.ico}`}>
+        {TRAIN_KIND_ICON[t.kind]}
+      </div>
+      <div className={`mt-3 text-[10px] uppercase tracking-wider font-semibold ${tt.text}`}>
+        {TRAIN_KIND_LABEL[t.kind]} · {t.diff}
+      </div>
+      <div className="mt-1 text-[14px] font-semibold text-white leading-snug">{t.title}</div>
+      <div className="mt-1.5 text-[11.5px] text-zinc-400 leading-relaxed">{t.excerpt}</div>
+      <button className="mt-4 inline-flex items-center gap-1 text-[11.5px] text-zinc-300 hover:text-white">
+        {t.done ? 'Nochmal ansehen' : 'Starten'} <ArrowRight size={11} className="group-hover:translate-x-0.5 transition" />
+      </button>
+    </div>
+  )
+}
+
+/* ------------------------ 5 · LIVE-KI-ANALYSE ---------------------------- */
+
+function LiveAIAnalysis({
+  thinkingIdx,
+  phase,
+  result,
+}: {
+  thinkingIdx: number
+  phase: 'running' | 'result'
+  result: { kind: string; title: string; detail: string; tone: AIResultTone }
+}) {
+  const isResult = phase === 'result'
+  return (
+    <div className="relative rounded-2xl kf-glass p-6 overflow-hidden">
+      <div className="absolute -top-16 -right-16 h-44 w-44 rounded-full bg-indigo-500/25 blur-3xl" />
+      <div className="absolute -bottom-16 -left-16 h-44 w-44 rounded-full bg-fuchsia-500/20 blur-3xl" />
+
+      <div className="relative flex items-center gap-3">
+        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 flex items-center justify-center kf-neon">
+          <Brain size={18} className="text-white" />
+        </div>
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-indigo-300 font-semibold">Live · KI-Analyse</div>
+          <div className="text-base font-semibold text-white">
+            {isResult ? 'Erkenntnis bereit' : 'Was die KI gerade tut'}
+          </div>
+        </div>
+        <span className={cls(
+          'ml-auto inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-full border transition',
+          isResult
+            ? 'bg-emerald-500/15 border-emerald-400/30 text-emerald-200'
+            : 'bg-emerald-500/10 border-emerald-400/20 text-emerald-300',
+        )}>
+          {isResult ? <CheckCircle2 size={11} /> : <Cpu size={11} />}
+          {isResult ? 'Ergebnis · 92 %' : '92 % Konfidenz'}
+        </span>
+      </div>
+
+      {/* Active thinking line OR result card */}
+      {isResult ? (
+        <LiveAIResultCard result={result} />
+      ) : (
+        <div className="relative mt-5 rounded-xl border border-indigo-400/20 bg-indigo-500/[0.06] p-3.5 overflow-hidden">
+          <div className="kf-scan" style={{ height: '60%' }} />
+          <div className="flex items-center gap-3 relative">
+            <Loader2 size={14} className="text-indigo-300 animate-spin" />
+            <div key={thinkingIdx} className="text-[13px] text-indigo-100/95 kf-think">
+              {AI_THINKING_LINES[thinkingIdx]}
+            </div>
+            <span className="ml-auto text-[10px] text-zinc-500 tabular-nums">
+              Schritt {thinkingIdx + 1} / {AI_THINKING_LINES.length}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Step list (history) */}
+      <ul className="mt-4 space-y-2">
+        {AI_THINKING_LINES.map((line, i) => {
+          const done = isResult ? true : i < thinkingIdx
+          const active = !isResult && i === thinkingIdx
+          return (
+            <li
+              key={line}
+              className={cls('flex items-start gap-3 text-[12.5px]', (done || active) && 'kf-step-tick')}
+              style={{ animationDelay: `${i * 60}ms` }}
+            >
+              <span className={cls(
+                'mt-1 h-4 w-4 rounded-full flex items-center justify-center shrink-0 border transition',
+                done ? 'bg-emerald-500/20 border-emerald-400/30 text-emerald-300'
+                : active ? 'bg-indigo-500/20 border-indigo-400/40 text-indigo-200'
+                : 'bg-white/[0.03] border-white/10 text-zinc-600',
+              )}>
+                {done ? <CheckCircle2 size={10} /> : active ? <CircleDot size={9} /> : <span className="text-[9px]">{i + 1}</span>}
+              </span>
+              <span className={cls(done ? 'text-zinc-500' : active ? 'text-white' : 'text-zinc-400')}>{line}</span>
+            </li>
+          )
+        })}
+      </ul>
+
+      {/* Outcomes */}
+      <div className="mt-5 pt-5 border-t border-white/5 grid grid-cols-3 gap-2">
+        <OutcomeStat icon={<Radar size={12} />} label="Risiken erkannt" value="3" tone="rose" />
+        <OutcomeStat icon={<Layers size={12} />} label="Wissen verknüpft" value="14" tone="indigo" />
+        <OutcomeStat icon={<Lightbulb size={12} />} label="Empfehlungen" value="5" tone="amber" />
+      </div>
+    </div>
+  )
+}
+
+const AI_RESULT_TONE: Record<AIResultTone, { ring: string; bg: string; pill: string; iconWrap: string; ico: React.ReactNode }> = {
+  amber:  { ring: 'border-amber-400/30',  bg: 'bg-amber-500/[0.07]',  pill: 'bg-amber-500/15 text-amber-200 border-amber-400/30',   iconWrap: 'from-amber-400 to-orange-500',  ico: <Lightbulb size={14} className="text-white" /> },
+  rose:   { ring: 'border-rose-400/30',   bg: 'bg-rose-500/[0.07]',   pill: 'bg-rose-500/15 text-rose-200 border-rose-400/30',     iconWrap: 'from-rose-500 to-fuchsia-500',  ico: <AlertTriangle size={14} className="text-white" /> },
+  indigo: { ring: 'border-indigo-400/30', bg: 'bg-indigo-500/[0.07]', pill: 'bg-indigo-500/15 text-indigo-200 border-indigo-400/30', iconWrap: 'from-indigo-500 to-violet-500', ico: <Layers size={14} className="text-white" /> },
+}
+
+function LiveAIResultCard({ result }: { result: { kind: string; title: string; detail: string; tone: AIResultTone } }) {
+  const t = AI_RESULT_TONE[result.tone]
+  return (
+    <div
+      key={result.kind}
+      className={cls(
+        'relative mt-5 rounded-xl border p-4 overflow-hidden kf-result-wipe',
+        t.ring,
+        t.bg,
+      )}
+    >
+      <div className="flex items-start gap-3">
+        <div className={cls('h-8 w-8 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0 kf-neon', t.iconWrap)}>
+          {t.ico}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={cls('text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded border', t.pill)}>
+              {result.kind}
+            </span>
+            <span className="inline-flex items-center gap-1 text-[10px] text-zinc-500">
+              <Sparkles size={10} className="text-indigo-300" /> aus Wissens­basis
+            </span>
+          </div>
+          <div className="mt-1.5 text-[13.5px] font-semibold text-white leading-snug">{result.title}</div>
+          <div className="mt-1 text-[12px] text-zinc-300/90 leading-relaxed">{result.detail}</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const OUTCOME_TONE: Record<string, { ico: string; val: string }> = {
+  rose:   { ico: 'text-rose-300',   val: 'text-rose-200' },
+  indigo: { ico: 'text-indigo-300', val: 'text-indigo-200' },
+  amber:  { ico: 'text-amber-300',  val: 'text-amber-200' },
+}
+
+function OutcomeStat({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: keyof typeof OUTCOME_TONE }) {
+  const t = OUTCOME_TONE[tone]
+  return (
+    <div className="rounded-lg border border-white/8 bg-white/[0.02] p-3">
+      <div className={`flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-medium ${t.ico}`}>
+        {icon} {label}
+      </div>
+      <div className={`mt-1 text-xl font-semibold tabular-nums ${t.val}`}>{value}</div>
+    </div>
+  )
+}
+
+/* -------------------------- 6 · MENTOR WISDOM ---------------------------- */
+
+function MentorWisdom() {
+  const m = ONBOARDING_MENTOR
+  return (
+    <div className="relative rounded-2xl kf-glass p-6 overflow-hidden">
+      <div className="absolute -top-16 right-0 h-44 w-44 rounded-full bg-fuchsia-500/25 blur-3xl" />
+
+      <div className="relative flex items-start gap-4">
+        <div className="relative">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-fuchsia-500 via-violet-500 to-indigo-500 flex items-center justify-center text-white text-base font-semibold tracking-wide shadow-lg shadow-fuchsia-500/30">
+            {m.initials}
+          </div>
+          <span className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-amber-400 border-2 border-zinc-950 flex items-center justify-center">
+            <Award size={10} className="text-zinc-900" />
+          </span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="text-base font-semibold text-white">{m.name}</div>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-fuchsia-500/15 text-fuchsia-200 border border-fuchsia-400/30">
+              {m.yearsExp} Jahre Erfahrung
+            </span>
+          </div>
+          <div className="text-[12px] text-zinc-400">{m.role}</div>
+          <div className="mt-1.5 text-[11px] text-zinc-500">
+            Renteneintritt in <span className="text-amber-300 font-medium">{m.retiresIn}</span> · <span className="text-fuchsia-200 font-medium">{m.knowledgeEntries}</span> Wissens-Einträge bereits gesichert
+          </div>
+        </div>
+      </div>
+
+      <div className="relative mt-5 rounded-xl border border-fuchsia-400/15 bg-fuchsia-500/[0.05] p-4">
+        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] text-fuchsia-300 font-semibold">
+          <Sparkle size={11} /> Sein Wissen lebt in deinem Onboarding weiter
+        </div>
+        <div className="mt-1.5 text-[13px] text-zinc-200 leading-relaxed">
+          „Heinz hat über 28 Jahre stille Details gelernt, die in keiner SOP stehen.
+          KnowFlow hat sie aus seinen Interviews extrahiert — und gibt sie dir jetzt im richtigen Moment."
+        </div>
+      </div>
+
+      <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div>
+          <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold mb-2 flex items-center gap-1.5">
+            <Quote size={11} className="text-fuchsia-300" /> Persönliche Tipps
+          </div>
+          <ul className="space-y-2">
+            {MENTOR_TIPS.map((t, i) => (
+              <li key={i} className="rounded-lg border border-white/8 bg-white/[0.02] p-2.5">
+                <div className="text-[10px] uppercase tracking-wider text-fuchsia-300/80 font-medium">{t.tag}</div>
+                <div className="mt-0.5 text-[12px] text-zinc-200 leading-relaxed">„{t.text}"</div>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold mb-2 flex items-center gap-1.5">
+            <AlertTriangle size={11} className="text-amber-300" /> Typische Anfängerfehler
+          </div>
+          <ul className="space-y-2">
+            {TYPICAL_MISTAKES.map((m, i) => (
+              <li key={i} className="rounded-lg border border-white/8 bg-white/[0.02] p-2.5">
+                <div className="flex items-start gap-2 text-[12px] text-zinc-200">
+                  <XCircle size={11} className="text-rose-400 mt-0.5 shrink-0" />
+                  <span>{m.mistake}</span>
+                </div>
+                <div className="mt-1 flex items-start gap-2 text-[11.5px] text-emerald-300">
+                  <CheckCircle2 size={11} className="mt-0.5 shrink-0" />
+                  <span>{m.fix}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* --------------------- 7 · PRODUKTIVITÄTS-TIMELINE ----------------------- */
+
+function ProductivityTimeline() {
+  const e = ONBOARDING_EMPLOYEE
+  const days = Array.from({ length: e.productivityWithout }, (_, i) => i + 1)
+  const withPct = (e.productivityWith / e.productivityWithout) * 100
+  return (
+    <section className="mt-10">
+      <SectionDarkHeader
+        eyebrow="Time-to-Productivity"
+        title="Mit KnowFlow ist Lukas 5 Tage früher produktiv."
+      />
+
+      <div className="relative mt-5 rounded-2xl kf-glass p-6 overflow-hidden">
+        <div className="absolute -top-14 left-1/3 h-44 w-44 rounded-full bg-violet-500/20 blur-3xl" />
+
+        {/* day axis */}
+        <div className="relative">
+          <div className="flex items-center justify-between text-[10px] text-zinc-500 mb-2 tabular-nums">
+            {days.map((d) => (
+              <span key={d} className={d === 1 || d === e.productivityWith || d === e.productivityWithout ? 'text-zinc-300 font-medium' : ''}>
+                T{d}
+              </span>
+            ))}
+          </div>
+          <div className="relative h-[1px] bg-white/10 mb-7">
+            <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-indigo-500/40 via-violet-500/40 to-fuchsia-500/40" />
+          </div>
+
+          {/* Bar 1 — Without */}
+          <TimelineBar
+            label="Ohne KnowFlow"
+            sub={`Produktiv ab Tag ${e.productivityWithout}`}
+            widthPct={100}
+            color="bg-zinc-700/60"
+            text="text-zinc-400"
+            icon={<TrendingDown size={12} />}
+            iconCls="bg-zinc-600/40 text-zinc-300"
+            badge={`${e.productivityWithout} Tage`}
+            delay="0ms"
+            endLabel={`Tag ${e.productivityWithout}`}
+          />
+
+          <TimelineBar
+            label="Mit KnowFlow"
+            sub={`Produktiv ab Tag ${e.productivityWith}`}
+            widthPct={withPct}
+            color="bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500"
+            text="text-white"
+            icon={<TrendingUp size={12} />}
+            iconCls="bg-indigo-500/30 text-indigo-100 border border-indigo-400/30"
+            badge={`${e.productivityWith} Tage`}
+            delay="200ms"
+            endLabel={`Tag ${e.productivityWith}`}
+            highlighted
+          />
+        </div>
+
+        <div className="mt-7 pt-5 border-t border-white/5 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-4 text-[12px]">
+            <span className="inline-flex items-center gap-1.5 text-indigo-200 font-medium">
+              <Zap size={12} className="text-indigo-300" /> 5 Tage schneller produktiv
+            </span>
+            <span className="text-zinc-500">·</span>
+            <span className="inline-flex items-center gap-1.5 text-emerald-300">
+              <TrendingUp size={12} /> −36 % Time-to-Productivity
+            </span>
+          </div>
+          <span className="text-[11px] text-zinc-500">Ø aus 7 Mittelstands-Pilotprojekten</span>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function TimelineBar({ label, sub, widthPct, color, text, icon, iconCls, badge, delay, endLabel, highlighted }: { label: string; sub: string; widthPct: number; color: string; text: string; icon: React.ReactNode; iconCls: string; badge: string; delay: string; endLabel: string; highlighted?: boolean }) {
+  return (
+    <div className="mb-5 last:mb-0">
+      <div className="flex items-center justify-between text-[12px] mb-1.5">
+        <div className="flex items-center gap-2">
+          <span className={`inline-flex items-center justify-center h-5 w-5 rounded-md ${iconCls}`}>{icon}</span>
+          <span className={`${text} font-medium`}>{label}</span>
+          <span className="text-zinc-500">·</span>
+          <span className="text-zinc-400">{sub}</span>
+        </div>
+        <span className={`text-[10px] px-1.5 py-0.5 rounded border ${highlighted ? 'bg-indigo-500/15 border-indigo-400/30 text-indigo-200' : 'bg-white/[0.04] border-white/10 text-zinc-400'}`}>
+          {badge}
+        </span>
+      </div>
+      <div className="relative h-3 rounded-full bg-white/[0.04] overflow-hidden">
+        <div
+          className={`absolute inset-y-0 left-0 rounded-full ${color} kf-bar-fill`}
+          style={{ ['--kf-bar-end' as never]: `${widthPct}%`, animationDelay: delay }}
+        />
+        {highlighted && (
+          <div className="absolute inset-y-0 left-0 kf-data-line opacity-30 rounded-full"
+               style={{ width: `${widthPct}%` }} />
+        )}
+        {/* end marker */}
+        <div
+          className="absolute top-1/2 -translate-y-1/2 flex items-center"
+          style={{ left: `${Math.min(widthPct, 99)}%` }}
+        >
+          <div className={cls('h-4 w-4 -translate-x-1/2 rounded-full border-2', highlighted ? 'bg-white border-fuchsia-400 shadow-lg shadow-fuchsia-500/50' : 'bg-zinc-300 border-zinc-500')} />
+          <span className={cls('ml-2 text-[10px] font-medium whitespace-nowrap', highlighted ? 'text-fuchsia-200' : 'text-zinc-400')}>{endLabel}</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ----------------------- 8 · COPILOT Q&A BOX ----------------------------- */
+
+function CopilotQABox({ state, onAsk, onReset }: { state: 'idle' | 'thinking' | 'answered'; onAsk: () => void; onReset: () => void }) {
+  return (
+    <section className="mt-10">
+      <SectionDarkHeader
+        eyebrow="KI-Assistent · live"
+        title="Stelle Heinz' Wissen eine Frage. Die KI antwortet."
+      />
+
+      <div className="relative mt-5 rounded-2xl overflow-hidden border border-indigo-400/25 bg-gradient-to-br from-indigo-500/[0.07] via-violet-500/[0.04] to-fuchsia-500/[0.06]">
+        <div className="absolute inset-0 kf-ops-grid opacity-40 pointer-events-none" />
+
+        {/* Question row */}
+        <div className="relative px-5 lg:px-7 py-5 border-b border-white/5 flex flex-wrap items-center gap-3">
+          <div className="h-9 w-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300">
+            <User size={15} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Lukas fragt</div>
+            <div className="text-[14px] font-medium text-white">{COPILOT_QA.question}</div>
+          </div>
+          {state === 'idle' && (
+            <button
+              onClick={onAsk}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white text-zinc-900 text-[12.5px] font-medium hover:bg-zinc-100 transition"
+            >
+              <Sparkles size={13} /> Antwort generieren
+            </button>
+          )}
+          {state === 'answered' && (
+            <button
+              onClick={onReset}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-white/10 bg-white/[0.04] text-[12px] text-zinc-300 hover:bg-white/[0.08]"
+            >
+              <RefreshCcw size={12} /> Neu fragen
+            </button>
+          )}
+        </div>
+
+        {/* Body */}
+        <div className="relative px-5 lg:px-7 py-6">
+          {state === 'idle' && (
+            <div className="text-center py-8">
+              <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-gradient-to-br from-indigo-500/30 to-fuchsia-500/30 mb-3">
+                <Bot size={22} className="text-indigo-200" />
+              </div>
+              <div className="text-[13px] text-zinc-400 max-w-md mx-auto">
+                Klicke "Antwort generieren", um zu sehen, wie KnowFlow das gesicherte Wissen von Heinz Müller in eine strukturierte Antwort verwandelt.
+              </div>
+            </div>
+          )}
+
+          {state === 'thinking' && <CopilotThinking />}
+
+          {state === 'answered' && <CopilotAnswer />}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function CopilotThinking() {
+  return (
+    <div className="space-y-3 max-w-2xl">
+      {AI_THINKING_LINES.slice(0, 4).map((line, i) => (
+        <div key={line} className="flex items-center gap-3 kf-pop" style={{ animationDelay: `${i * 300}ms` }}>
+          <Loader2 size={14} className="text-indigo-300 animate-spin shrink-0" />
+          <span className="text-[13px] text-zinc-300">{line}</span>
+        </div>
+      ))}
+      <div className="kf-shimmer h-1.5 w-48 rounded-full bg-white/5 mt-4" />
+    </div>
+  )
+}
+
+function CopilotAnswer() {
+  return (
+    <div className="space-y-5">
+      {/* Diagnose */}
+      <div className="flex items-start gap-3">
+        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/30">
+          <Bot size={16} className="text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="text-[10px] uppercase tracking-[0.15em] text-indigo-300 font-semibold">KnowFlow Copilot</div>
+            <span className="text-[10px] px-1.5 py-0.5 rounded border bg-emerald-500/10 border-emerald-400/30 text-emerald-300">
+              Konfidenz {COPILOT_QA.confidence} %
+            </span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded border bg-fuchsia-500/10 border-fuchsia-400/30 text-fuchsia-300">
+              Quelle · {COPILOT_QA.source.entry}
+            </span>
+          </div>
+          <h4 className="mt-2 text-lg font-semibold text-white tracking-tight leading-snug">{COPILOT_QA.diagnose}</h4>
+          <p className="mt-1.5 text-[13px] text-zinc-300 leading-relaxed">{COPILOT_QA.cause}</p>
+        </div>
+      </div>
+
+      {/* Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        {/* Steps */}
+        <div className="lg:col-span-2 rounded-xl border border-white/8 bg-white/[0.02] p-4">
+          <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-indigo-300 font-semibold mb-3">
+            <Workflow size={11} /> Schritt-für-Schritt
+          </div>
+          <ol className="space-y-2.5">
+            {COPILOT_QA.steps.map((step, i) => (
+              <li key={i} className="flex items-start gap-3 kf-pop" style={{ animationDelay: `${i * 80}ms` }}>
+                <span className="mt-0.5 h-5 w-5 rounded-md bg-indigo-500/15 border border-indigo-400/30 text-indigo-200 text-[10px] font-semibold flex items-center justify-center shrink-0">{i + 1}</span>
+                <span className="text-[13px] text-zinc-200">{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        {/* Safety + experience */}
+        <div className="space-y-3">
+          <div className="rounded-xl border border-rose-400/25 bg-rose-500/[0.06] p-4">
+            <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-rose-300 font-semibold">
+              <ShieldAlert size={11} /> Sicherheitswarnung
+            </div>
+            <p className="mt-1.5 text-[12.5px] text-zinc-200 leading-relaxed">{COPILOT_QA.safety}</p>
+          </div>
+          <div className="rounded-xl border border-fuchsia-400/25 bg-fuchsia-500/[0.06] p-4">
+            <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-fuchsia-300 font-semibold">
+              <Quote size={11} /> Erfahrungswissen
+            </div>
+            <p className="mt-1.5 text-[12.5px] text-zinc-200 italic leading-relaxed">
+              „Wenn die CNC-200 nach einem Lagerwechsel klingelt — direkt runter mit der Drehzahl. Lieber 10 Minuten Einlauf, als ein zerstörtes Lager."
+            </p>
+            <div className="mt-2 text-[10.5px] text-zinc-500">— Heinz Müller · Senior CNC-Programmierer</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ----------------------- Shared mini header ----------------------------- */
+
+function SectionDarkHeader({ eyebrow, title, right }: { eyebrow: string; title: string; right?: React.ReactNode }) {
+  return (
+    <div className="flex items-end justify-between gap-4">
+      <div>
+        <div className="text-[10px] uppercase tracking-[0.2em] font-semibold text-indigo-300">{eyebrow}</div>
+        <h2 className="mt-1 text-xl lg:text-2xl font-semibold tracking-tight text-white">{title}</h2>
+      </div>
+      {right}
     </div>
   )
 }
@@ -3282,9 +4590,10 @@ function ThinkingBubble({ thinking }: { thinking: AssistantThinking }) {
 
 function AnswerView({ question, answer, ts }: { question: string; answer: StructuredAnswer; ts: string }) {
   const riskTone: Record<RiskLevel, { label: string; tone: 'emerald' | 'amber' | 'rose'; icon: React.ReactNode }> = {
-    low:    { label: 'Niedriges Risiko',   tone: 'emerald', icon: <CheckCircle2 size={11} /> },
-    medium: { label: 'Mittleres Risiko',   tone: 'amber',   icon: <AlertTriangle size={11} /> },
-    high:   { label: 'Hohes Sicherheits­risiko', tone: 'rose',  icon: <ShieldAlert size={11} /> },
+    low:      { label: 'Niedriges Risiko',         tone: 'emerald', icon: <CheckCircle2 size={11} /> },
+    medium:   { label: 'Mittleres Risiko',         tone: 'amber',   icon: <AlertTriangle size={11} /> },
+    high:     { label: 'Hohes Sicherheits­risiko', tone: 'rose',    icon: <ShieldAlert size={11} /> },
+    critical: { label: 'Kritisches Risiko',        tone: 'rose',    icon: <ShieldAlert size={11} /> },
   }
   const risk = riskTone[answer.risk]
 
