@@ -64,6 +64,23 @@ import {
   CircleDot,
   Sparkle,
   Volume2,
+  Gauge,
+  BadgeCheck,
+  FileCheck2,
+  LineChart,
+  ScrollText,
+  Building2,
+  PercentSquare,
+  GanttChartSquare,
+  Waves,
+  Network,
+  Pause,
+  CircleStop,
+  CornerDownRight,
+  GitBranch,
+  Mic2,
+  Spline,
+  Database,
 } from 'lucide-react'
 
 /* ============================================================================
@@ -76,6 +93,7 @@ import {
 
 type Section =
   | 'dashboard'
+  | 'operations'
   | 'capture'
   | 'interview'
   | 'sop'
@@ -849,13 +867,14 @@ function Sidebar({
   active: Section
   onChange: (s: Section) => void
 }) {
-  const items: { id: Section; label: string; icon: React.ReactNode }[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
-    { id: 'capture', label: 'Wissensaufnahme', icon: <Mic size={18} /> },
-    { id: 'interview', label: 'KI-Interview', icon: <MessageSquareText size={18} /> },
-    { id: 'sop', label: 'SOP-Generator', icon: <FileText size={18} /> },
-    { id: 'onboarding', label: 'Onboarding', icon: <GraduationCap size={18} /> },
-    { id: 'assistant', label: 'KI-Wissensassistent', icon: <Bot size={18} /> },
+  const items: { id: Section; label: string; icon: React.ReactNode; group?: string; badge?: string }[] = [
+    { id: 'dashboard',   label: 'Dashboard',          icon: <LayoutDashboard size={18} />, group: 'Übersicht' },
+    { id: 'operations',  label: 'Operations & ROI',   icon: <Gauge size={18} />,           group: 'Übersicht', badge: 'Werksleitung' },
+    { id: 'onboarding',  label: 'Onboarding',         icon: <GraduationCap size={18} />,   group: 'Mitarbeiter' },
+    { id: 'assistant',   label: 'KI-Wissensassistent', icon: <Bot size={18} />,            group: 'Mitarbeiter' },
+    { id: 'capture',     label: 'Wissensaufnahme',    icon: <Mic size={18} />,             group: 'Wissensbasis', badge: 'AI OS' },
+    { id: 'interview',   label: 'KI-Interview',       icon: <MessageSquareText size={18} />, group: 'Wissensbasis' },
+    { id: 'sop',         label: 'SOP-Generator',      icon: <FileText size={18} />,        group: 'Wissensbasis' },
   ]
 
   return (
@@ -872,28 +891,49 @@ function Sidebar({
         </div>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        {items.map((it) => {
-          const isActive = active === it.id
-          return (
-            <button
-              key={it.id}
-              onClick={() => onChange(it.id)}
-              className={cls(
-                'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
-              )}
-            >
-              <span className={cls(isActive ? 'text-indigo-600' : 'text-slate-400')}>
-                {it.icon}
-              </span>
-              {it.label}
-              {isActive && <ChevronRight size={14} className="ml-auto text-indigo-500" />}
-            </button>
-          )
-        })}
+      <nav className="flex-1 px-3 py-4 overflow-y-auto">
+        {Array.from(new Set(items.map((it) => it.group || 'Allgemein'))).map((group) => (
+          <div key={group} className="mb-3">
+            <div className="px-3 pb-1.5 pt-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+              {group}
+            </div>
+            <div className="space-y-1">
+              {items
+                .filter((it) => (it.group || 'Allgemein') === group)
+                .map((it) => {
+                  const isActive = active === it.id
+                  return (
+                    <button
+                      key={it.id}
+                      onClick={() => onChange(it.id)}
+                      className={cls(
+                        'group/nav w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                        isActive
+                          ? 'bg-indigo-50 text-indigo-700'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
+                      )}
+                    >
+                      <span className={cls(isActive ? 'text-indigo-600' : 'text-slate-400')}>
+                        {it.icon}
+                      </span>
+                      <span className="truncate">{it.label}</span>
+                      {it.badge && (
+                        <span className={cls(
+                          'ml-auto text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md border',
+                          isActive
+                            ? 'border-indigo-200 bg-white/60 text-indigo-700'
+                            : 'border-slate-200 bg-slate-50 text-slate-500',
+                        )}>
+                          {it.badge}
+                        </span>
+                      )}
+                      {!it.badge && isActive && <ChevronRight size={14} className="ml-auto text-indigo-500" />}
+                    </button>
+                  )
+                })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       <div className="p-3 border-t border-slate-100">
@@ -928,6 +968,7 @@ function Sidebar({
 function TopBar({ section }: { section: Section }) {
   const titles: Record<Section, string> = {
     dashboard: 'Übersicht',
+    operations: 'Operations & ROI · Werksleitung',
     capture: 'Wissen erfassen',
     interview: 'KI-Interview',
     sop: 'SOPs generieren',
@@ -2954,7 +2995,28 @@ const COPILOT_QA = {
   safety: 'Vor Arbeit am Spindelkopf: Hauptschalter aus, Verriegelung anbringen.',
   source: { entry: '#142 · Heinz Müller', date: '04.05.2026' },
   confidence: 92,
+  sopRefs: [
+    { id: 'SOP-CNC-018', title: 'Lagerwechsel CNC-200 · Schritt-für-Schritt', step: '8 / 11' },
+    { id: 'SOP-CNC-022', title: 'Spindel-Einlauf nach Service',                 step: '3 / 6' },
+    { id: 'SOP-SAFE-04', title: 'Arbeit am Spindelkopf · Sicherheitsregeln',   step: 'global' },
+  ],
+  history: [
+    { date: '14.03.2026', machine: 'CNC-200', incident: 'Lager nach 9 Tagen ausgefallen · Vorspannung 26 Nm',  outcome: '€ 4.200 Schaden' },
+    { date: '07.11.2025', machine: 'CNC-180', incident: 'Spindel-Resonanz bei 5.800 U/min · Einlauf übersprungen', outcome: '2,5 Tage Stillstand' },
+  ],
+  relatedExperts: [
+    { name: 'Heinz Müller', initials: 'HM', role: 'Senior CNC',          entries: 142 },
+    { name: 'Sven Krüger',  initials: 'SK', role: 'Hydraulik-Spezialist', entries: 88  },
+  ],
 }
+
+const SUGGESTED_QA_CHIPS: { q: string; tag: string; icon: React.ReactNode }[] = [
+  { q: 'Warum vibriert CNC-200 nach Lagerwechsel?',           tag: 'Diagnose',       icon: <Wrench size={11} /> },
+  { q: 'Welche Drehmomente gelten beim Werkzeugwechsel?',     tag: 'SOP-Lookup',     icon: <FileText size={11} /> },
+  { q: 'Was tun bei metallischem Geräusch der Spindel?',      tag: 'Akustik · Heinz', icon: <Volume2 size={11} /> },
+  { q: 'Wie kalibriere ich den Greifer R-12 nach Tausch?',    tag: 'Roboter',        icon: <Bot size={11} /> },
+  { q: 'Warum schwankt der Hydraulik-Druck in Halle C?',      tag: 'Hydraulik · Sven', icon: <Activity size={11} /> },
+]
 
 function Onboarding({
   days,
@@ -3049,6 +3111,9 @@ function Onboarding({
 
           {/* 4 · TRAININGS */}
           <TrainingsRow />
+
+          {/* 4b · RISIKO-RADAR / FEHLERPRÄVENTION */}
+          <ErrorPreventionStrip />
 
           {/* 5+6 · LIVE-KI + MENTOR-WISSEN */}
           <div className="mt-10 grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -3525,6 +3590,98 @@ function DayPlanRow({ step, index, selected, onClick }: { step: DayStep; index: 
 
 /* -------------------------- 3b · COPILOT PANEL --------------------------- */
 
+type LiveWarningSeverity = 'critical' | 'high' | 'info'
+
+const LIVE_WARNINGS: { tag: string; ts: string; title: string; detail: string; severity: LiveWarningSeverity; icon: React.ReactNode; freq?: string }[] = [
+  {
+    tag: 'Anfängerfehler · Statistik',
+    ts: 'vor 4 s',
+    title: 'Kühlmittel-Druck wird häufig übersehen',
+    detail: '92 % der neuen Bediener vergessen den Druck zu prüfen. Min. 14 bar vor Schnittbeginn.',
+    severity: 'high',
+    freq: '92 %',
+    icon: <AlertTriangle size={13} />,
+  },
+  {
+    tag: 'Maschinen-Akustik · Live',
+    ts: 'vor 11 s',
+    title: 'Metallisches Geräusch erkannt → Lager prüfen',
+    detail: 'CNC-200 Spindel zeigt Resonanz bei 6.400 U/min. Heinz' + "'" + ' Tipp: NOT-AUS bei Klingeln.',
+    severity: 'critical',
+    icon: <Volume2 size={13} />,
+  },
+  {
+    tag: 'Sequenz-Empfehlung',
+    ts: 'vor 22 s',
+    title: 'Vor Schritt 4: Sicherheitsprüfung zwingend',
+    detail: 'KI hat erkannt, dass deine Schattenarbeit ohne Tür-Verriegelung gestartet wurde.',
+    severity: 'high',
+    icon: <ShieldAlert size={13} />,
+  },
+]
+
+const LIVE_WARN_TONE: Record<LiveWarningSeverity, { ring: string; bar: string; chip: string; ico: string; pulse: string }> = {
+  critical: { ring: 'border-rose-400/30',   bar: 'from-rose-400 via-fuchsia-400 to-rose-400', chip: 'bg-rose-500/15 text-rose-200 border-rose-400/30',     ico: 'text-rose-300 bg-rose-500/15',   pulse: 'bg-rose-400' },
+  high:     { ring: 'border-amber-400/25',  bar: 'from-amber-400 via-orange-400 to-amber-400', chip: 'bg-amber-500/15 text-amber-200 border-amber-400/30', ico: 'text-amber-300 bg-amber-500/15', pulse: 'bg-amber-400' },
+  info:     { ring: 'border-indigo-400/25', bar: 'from-indigo-400 via-violet-400 to-indigo-400', chip: 'bg-indigo-500/15 text-indigo-200 border-indigo-400/30', ico: 'text-indigo-300 bg-indigo-500/15', pulse: 'bg-indigo-400' },
+}
+
+function LiveWarningsCard() {
+  const [idx, setIdx] = useState(0)
+  useEffect(() => {
+    const i = window.setInterval(() => setIdx((n) => (n + 1) % LIVE_WARNINGS.length), 4200)
+    return () => window.clearInterval(i)
+  }, [])
+  const w = LIVE_WARNINGS[idx]
+  const t = LIVE_WARN_TONE[w.severity]
+  return (
+    <div className={cls('relative rounded-2xl border bg-zinc-900/40 backdrop-blur-sm overflow-hidden', t.ring)}>
+      <div className={cls('absolute inset-x-0 top-0 h-px bg-gradient-to-r', t.bar)} />
+      <div className="p-4">
+        <div className="flex items-center gap-2">
+          <span className={cls('inline-flex items-center justify-center h-7 w-7 rounded-lg', t.ico)}>{w.icon}</span>
+          <div className="min-w-0">
+            <div className="text-[9.5px] uppercase tracking-[0.18em] font-semibold text-zinc-400">Live-Warnung · Echtzeit</div>
+            <div className="flex items-center gap-1.5 text-[10.5px] text-zinc-500">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className={cls('absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping', t.pulse)} />
+                <span className={cls('relative inline-flex h-1.5 w-1.5 rounded-full', t.pulse)} />
+              </span>
+              {w.ts}
+            </div>
+          </div>
+          {w.freq && (
+            <span className={cls('ml-auto inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border tabular-nums', t.chip)}>
+              {w.freq} Häufigkeit
+            </span>
+          )}
+        </div>
+
+        <div key={idx} className="mt-3 kf-toast-content-swap">
+          <div className={cls('text-[10px] uppercase tracking-wider font-semibold inline-flex items-center gap-1 px-1.5 py-0.5 rounded border', t.chip)}>
+            {w.tag}
+          </div>
+          <div className="mt-2 text-[13px] font-semibold text-white leading-snug">{w.title}</div>
+          <div className="mt-1 text-[12px] text-zinc-300/90 leading-relaxed">{w.detail}</div>
+        </div>
+
+        <div className="mt-3 flex items-center gap-1.5">
+          {LIVE_WARNINGS.map((_, i) => (
+            <span
+              key={i}
+              className={cls(
+                'h-1 rounded-full transition-all',
+                i === idx ? 'w-6 bg-zinc-200' : 'w-2 bg-white/15',
+              )}
+            />
+          ))}
+          <span className="ml-auto text-[10px] text-zinc-500">3 aktive Risiken</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function CopilotPanel({ activeStep }: { activeStep: DayStep }) {
   const meta = STEP_TYPE_META[activeStep.type]
   return (
@@ -3557,14 +3714,7 @@ function CopilotPanel({ activeStep }: { activeStep: DayStep }) {
         body="Du startest gleich die Schattenarbeit an CNC-200. Aktiviere zuerst das Spindel-Diagnose-Display."
         cta="KI-Begleitung aktivieren"
       />
-      <CopilotCard
-        kind="warning"
-        icon={<AlertTriangle size={13} />}
-        title="Typischer Anfängerfehler"
-        body="Neue Bediener vergessen oft den Kühlmittel-Druck zu prüfen. Min."
-        accent="14 bar"
-        tail=" vor Schnittbeginn."
-      />
+      <LiveWarningsCard />
       <CopilotCard
         kind="safety"
         icon={<ShieldCheck size={13} />}
@@ -3706,6 +3856,96 @@ function TrainingCard({ t, i }: { t: TrainingModule; i: number }) {
         {t.done ? 'Nochmal ansehen' : 'Starten'} <ArrowRight size={11} className="group-hover:translate-x-0.5 transition" />
       </button>
     </div>
+  )
+}
+
+/* --------------------- 4b · RISIKO-RADAR / FEHLERPRÄVENTION -------------- */
+
+const ERROR_PREVENTION_STATS: { label: string; value: string; sub: string; tone: 'rose' | 'amber' | 'emerald' | 'indigo'; icon: React.ReactNode }[] = [
+  { label: 'Fehler heute vermieden',  value: '3',     sub: 'davon 1 kritisch · Spindel-Stop',   tone: 'rose',    icon: <ShieldAlert size={13} /> },
+  { label: 'Risiko-Warnungen',         value: '12',    sub: 'in den letzten 24 h · 0 ignoriert', tone: 'amber',   icon: <Radar size={13} /> },
+  { label: 'Wartung antizipiert',      value: '1',     sub: 'CNC-200 Lager · in 14 h',           tone: 'indigo',  icon: <Wrench size={13} /> },
+  { label: 'Ausschuss vermieden',      value: '≈ 47 Stk.', sub: 'geschätzt · Q1-Schnitt',         tone: 'emerald', icon: <Target size={13} /> },
+]
+
+const ERROR_PREVENTION_LANES: { phase: string; risk: string; note: string; severity: 'critical' | 'high' | 'medium' | 'low' }[] = [
+  { phase: 'Vor Schritt',   risk: 'Kühlmittel-Druck nicht geprüft',          note: '92 % Häufigkeit · präventiv markiert',         severity: 'high' },
+  { phase: 'Während Schritt', risk: 'Spindel-Resonanz bei 6.400 U/min',       note: 'Akustik-Modell schlägt an · Heinz #142',       severity: 'critical' },
+  { phase: 'Nach Schritt',  risk: 'Werkstück-Maß ohne Stichprobe abgenommen', note: '3 historische Reklamationen verknüpft',         severity: 'medium' },
+]
+
+const ERR_TONE: Record<'rose' | 'amber' | 'emerald' | 'indigo', { text: string; chip: string; bg: string }> = {
+  rose:    { text: 'text-rose-200',    chip: 'text-rose-300    bg-rose-500/10    border-rose-400/25',    bg: 'from-rose-500/[0.08]' },
+  amber:   { text: 'text-amber-200',   chip: 'text-amber-300   bg-amber-500/10   border-amber-400/25',   bg: 'from-amber-500/[0.08]' },
+  emerald: { text: 'text-emerald-200', chip: 'text-emerald-300 bg-emerald-500/10 border-emerald-400/25', bg: 'from-emerald-500/[0.08]' },
+  indigo:  { text: 'text-indigo-200',  chip: 'text-indigo-300  bg-indigo-500/10  border-indigo-400/25',  bg: 'from-indigo-500/[0.08]' },
+}
+
+function ErrorPreventionStrip() {
+  return (
+    <section className="mt-10">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-white/8 pb-4">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.22em] text-rose-300 font-semibold">Risiko-Radar · Fehlerprävention</div>
+          <h2 className="mt-1 text-xl lg:text-2xl font-semibold text-white tracking-tight leading-snug">
+            Wo die KI heute Fehler antizipiert — bevor sie passieren
+          </h2>
+        </div>
+        <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-300">
+          <ShieldCheck size={11} /> 0 produktive Vorfälle · letzte 60 Tage
+        </span>
+      </div>
+
+      {/* Stats strip */}
+      <div className="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {ERROR_PREVENTION_STATS.map((s, i) => (
+          <div
+            key={s.label}
+            className={cls('relative rounded-2xl border border-white/8 bg-gradient-to-br to-transparent overflow-hidden p-4 kf-pop', ERR_TONE[s.tone].bg)}
+            style={{ animationDelay: `${i * 60}ms` }}
+          >
+            <div className="flex items-center gap-2">
+              <span className={cls('inline-flex items-center justify-center h-6 w-6 rounded-lg border', ERR_TONE[s.tone].chip)}>{s.icon}</span>
+              <div className="text-[10.5px] uppercase tracking-wider text-zinc-400 font-semibold">{s.label}</div>
+            </div>
+            <div className={cls('mt-3 text-xl font-semibold tabular-nums', ERR_TONE[s.tone].text)}>{s.value}</div>
+            <div className="mt-0.5 text-[11px] text-zinc-500">{s.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Lanes: vor / während / nach Schritt */}
+      <div className="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-3">
+        {ERROR_PREVENTION_LANES.map((l, i) => (
+          <div
+            key={l.phase}
+            className={cls(
+              'relative rounded-2xl border bg-gradient-to-br to-transparent p-4 kf-pop overflow-hidden',
+              l.severity === 'critical' ? 'border-rose-400/30 from-rose-500/[0.08]'
+              : l.severity === 'high' ? 'border-amber-400/25 from-amber-500/[0.06]'
+              : l.severity === 'medium' ? 'border-zinc-400/15 from-white/[0.03]'
+              : 'border-emerald-400/20 from-emerald-500/[0.04]',
+            )}
+            style={{ animationDelay: `${i * 80}ms` }}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-400 font-semibold">{l.phase}</span>
+              <span className={cls('inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded border uppercase tracking-wider', RISK_BADGE[l.severity])}>
+                <ShieldAlert size={10} /> {RISK_LABEL[l.severity]}
+              </span>
+            </div>
+            <div className="mt-2 text-[13.5px] font-semibold text-white leading-snug">{l.risk}</div>
+            <div className="mt-1 text-[12px] text-zinc-300/85 leading-relaxed">{l.note}</div>
+            <div className="mt-3 flex items-center gap-2">
+              <button className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-md border border-white/10 bg-white/[0.04] text-zinc-200 hover:bg-white/[0.08] transition">
+                Präventiv-SOP <ArrowRight size={10} />
+              </button>
+              <span className="text-[10.5px] text-zinc-500">aus 142 Wissens­einträgen</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }
 
@@ -4052,12 +4292,48 @@ function CopilotQABox({ state, onAsk, onReset }: { state: 'idle' | 'thinking' | 
   return (
     <section className="mt-10">
       <SectionDarkHeader
-        eyebrow="KI-Assistent · live"
-        title="Stelle Heinz' Wissen eine Frage. Die KI antwortet."
+        eyebrow="KI-Assistent · operativ"
+        title="Frag Heinz — strukturierte Antworten aus 142 Wissens­einträgen"
+        right={
+          <span className="hidden lg:inline-flex items-center gap-1.5 text-[11px] text-zinc-400">
+            <Layers size={11} className="text-indigo-300" />
+            Erfahrungswissen × SOPs × Fehlerhistorie × Sicherheits­regeln
+          </span>
+        }
       />
 
       <div className="relative mt-5 rounded-2xl overflow-hidden border border-indigo-400/25 bg-gradient-to-br from-indigo-500/[0.07] via-violet-500/[0.04] to-fuchsia-500/[0.06]">
         <div className="absolute inset-0 kf-ops-grid opacity-40 pointer-events-none" />
+
+        {/* Suggested question chips */}
+        {state === 'idle' && (
+          <div className="relative px-5 lg:px-7 pt-5 pb-3 border-b border-white/5">
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-zinc-500 font-semibold">
+              <Sparkles size={11} className="text-indigo-300" />
+              <span>Vorschläge aus heutigem Kontext</span>
+              <span className="text-zinc-700">·</span>
+              <span className="text-zinc-500 normal-case tracking-normal">Schattenarbeit CNC-200</span>
+            </div>
+            <div className="mt-2.5 flex flex-wrap gap-1.5">
+              {SUGGESTED_QA_CHIPS.map((c) => (
+                <button
+                  key={c.q}
+                  type="button"
+                  className={cls(
+                    'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11.5px] transition',
+                    c.q === COPILOT_QA.question
+                      ? 'border-indigo-400/40 bg-indigo-500/15 text-indigo-100'
+                      : 'border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08]',
+                  )}
+                >
+                  <span className={cls(c.q === COPILOT_QA.question ? 'text-indigo-200' : 'text-indigo-300')}>{c.icon}</span>
+                  <span className="truncate max-w-[280px]">{c.q}</span>
+                  <span className="text-[9.5px] uppercase tracking-wider text-zinc-500">· {c.tag}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Question row */}
         <div className="relative px-5 lg:px-7 py-5 border-b border-white/5 flex flex-wrap items-center gap-3">
@@ -4071,7 +4347,7 @@ function CopilotQABox({ state, onAsk, onReset }: { state: 'idle' | 'thinking' | 
           {state === 'idle' && (
             <button
               onClick={onAsk}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white text-zinc-900 text-[12.5px] font-medium hover:bg-zinc-100 transition"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white text-zinc-900 text-[12.5px] font-medium hover:bg-zinc-100 transition kf-cta-glow"
             >
               <Sparkles size={13} /> Antwort generieren
             </button>
@@ -4089,13 +4365,28 @@ function CopilotQABox({ state, onAsk, onReset }: { state: 'idle' | 'thinking' | 
         {/* Body */}
         <div className="relative px-5 lg:px-7 py-6">
           {state === 'idle' && (
-            <div className="text-center py-8">
-              <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-gradient-to-br from-indigo-500/30 to-fuchsia-500/30 mb-3">
-                <Bot size={22} className="text-indigo-200" />
-              </div>
-              <div className="text-[13px] text-zinc-400 max-w-md mx-auto">
-                Klicke "Antwort generieren", um zu sehen, wie KnowFlow das gesicherte Wissen von Heinz Müller in eine strukturierte Antwort verwandelt.
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <IdleFacet
+                icon={<FileText size={13} />}
+                tone="indigo"
+                label="SOPs verknüpft"
+                value="3 SOPs · 17 Schritte"
+                sub="passend zu deiner heutigen Schicht"
+              />
+              <IdleFacet
+                icon={<AlertOctagon size={13} />}
+                tone="rose"
+                label="Fehlerhistorie"
+                value="2 Vorfälle ähnlich"
+                sub="letzte 18 Monate · Halle B"
+              />
+              <IdleFacet
+                icon={<Quote size={13} />}
+                tone="fuchsia"
+                label="Erfahrungswissen"
+                value="Heinz · 28 Jahre CNC"
+                sub="142 Wissens­einträge · Konfidenz 92 %"
+              />
             </div>
           )}
 
@@ -4105,6 +4396,26 @@ function CopilotQABox({ state, onAsk, onReset }: { state: 'idle' | 'thinking' | 
         </div>
       </div>
     </section>
+  )
+}
+
+const IDLE_FACET_TONE: Record<'indigo' | 'rose' | 'fuchsia', { ring: string; bg: string; ico: string; text: string }> = {
+  indigo:  { ring: 'border-indigo-400/25',  bg: 'bg-indigo-500/[0.05]',  ico: 'text-indigo-300 bg-indigo-500/15',   text: 'text-indigo-200' },
+  rose:    { ring: 'border-rose-400/25',    bg: 'bg-rose-500/[0.05]',    ico: 'text-rose-300 bg-rose-500/15',       text: 'text-rose-200' },
+  fuchsia: { ring: 'border-fuchsia-400/25', bg: 'bg-fuchsia-500/[0.05]', ico: 'text-fuchsia-300 bg-fuchsia-500/15', text: 'text-fuchsia-200' },
+}
+
+function IdleFacet({ icon, tone, label, value, sub }: { icon: React.ReactNode; tone: keyof typeof IDLE_FACET_TONE; label: string; value: string; sub: string }) {
+  const t = IDLE_FACET_TONE[tone]
+  return (
+    <div className={cls('rounded-xl border p-4', t.ring, t.bg)}>
+      <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-wider font-semibold text-zinc-400">
+        <span className={cls('inline-flex items-center justify-center h-6 w-6 rounded-lg', t.ico)}>{icon}</span>
+        {label}
+      </div>
+      <div className={cls('mt-2 text-[14px] font-semibold', t.text)}>{value}</div>
+      <div className="mt-0.5 text-[11.5px] text-zinc-500">{sub}</div>
+    </div>
   )
 }
 
@@ -4178,6 +4489,78 @@ function CopilotAnswer() {
               „Wenn die CNC-200 nach einem Lagerwechsel klingelt — direkt runter mit der Drehzahl. Lieber 10 Minuten Einlauf, als ein zerstörtes Lager."
             </p>
             <div className="mt-2 text-[10.5px] text-zinc-500">— Heinz Müller · Senior CNC-Programmierer</div>
+          </div>
+        </div>
+      </div>
+
+      {/* SOP refs + Fehlerhistorie + Related Experts */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+        {/* SOP-Verknüpfungen */}
+        <div className="lg:col-span-5 rounded-xl border border-indigo-400/20 bg-indigo-500/[0.04] p-4">
+          <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-indigo-300 font-semibold">
+            <FileCheck2 size={11} /> SOP-Verknüpfungen
+            <span className="ml-auto text-[10px] text-zinc-500 tracking-normal normal-case">automatisch erkannt</span>
+          </div>
+          <div className="mt-3 space-y-2">
+            {COPILOT_QA.sopRefs.map((s) => (
+              <div key={s.id} className="flex items-center gap-2 rounded-lg border border-white/8 bg-white/[0.02] px-2.5 py-2 hover:bg-white/[0.05] transition">
+                <span className="inline-flex items-center justify-center h-6 w-6 rounded-md bg-indigo-500/15 border border-indigo-400/25 text-indigo-200">
+                  <FileText size={11} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[12.5px] text-white truncate">{s.title}</div>
+                  <div className="text-[10.5px] text-zinc-500 tabular-nums">{s.id} · Schritt {s.step}</div>
+                </div>
+                <ArrowUpRight size={12} className="text-zinc-500 shrink-0" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Fehlerhistorie */}
+        <div className="lg:col-span-4 rounded-xl border border-rose-400/20 bg-rose-500/[0.04] p-4">
+          <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-rose-300 font-semibold">
+            <AlertOctagon size={11} /> Fehlerhistorie
+            <span className="ml-auto text-[10px] text-zinc-500 tracking-normal normal-case">{COPILOT_QA.history.length} ähnliche Vorfälle</span>
+          </div>
+          <div className="mt-3 space-y-2">
+            {COPILOT_QA.history.map((h, i) => (
+              <div key={i} className="rounded-lg border border-white/8 bg-white/[0.02] px-2.5 py-2">
+                <div className="flex items-center gap-2 text-[10.5px]">
+                  <span className="text-zinc-500 tabular-nums">{h.date}</span>
+                  <span className="text-zinc-700">·</span>
+                  <span className="text-zinc-300">{h.machine}</span>
+                  <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-semibold text-rose-300 bg-rose-500/10 border border-rose-400/30 px-1.5 py-0.5 rounded">
+                    {h.outcome}
+                  </span>
+                </div>
+                <div className="mt-1 text-[12px] text-zinc-200 leading-snug">{h.incident}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Verknüpfte Experten */}
+        <div className="lg:col-span-3 rounded-xl border border-fuchsia-400/20 bg-fuchsia-500/[0.04] p-4">
+          <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-fuchsia-300 font-semibold">
+            <Users size={11} /> Wissens­basis
+          </div>
+          <div className="mt-3 space-y-2">
+            {COPILOT_QA.relatedExperts.map((e) => (
+              <div key={e.name} className="flex items-center gap-2 rounded-lg border border-white/8 bg-white/[0.02] px-2.5 py-2">
+                <div className="h-7 w-7 rounded-md bg-fuchsia-500/15 border border-fuchsia-400/25 flex items-center justify-center text-[10px] font-semibold text-fuchsia-200">
+                  {e.initials}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[12px] text-white truncate">{e.name}</div>
+                  <div className="text-[10.5px] text-zinc-500 truncate">{e.role}</div>
+                </div>
+                <span className="text-[10.5px] text-fuchsia-200 tabular-nums">{e.entries}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 text-[10.5px] text-zinc-500 leading-relaxed border-t border-white/5 pt-2.5">
+            Antwort kombiniert Senior-Erfahrung + SOPs + historische Vorfälle.
           </div>
         </div>
       </div>
@@ -4834,6 +5217,1934 @@ function AnswerBlock({
   )
 }
 
+/* ============================================================================
+   OPERATIONS & ROI  ·  Enterprise Layer für Werksleitung
+   ROI Dashboard · Wissensverlust-Risiko · Compliance & Audit
+   ========================================================================== */
+
+type OpsKpiTone = 'indigo' | 'emerald' | 'amber' | 'rose' | 'sky' | 'violet'
+
+interface OpsKpi {
+  label: string
+  value: string
+  delta: string
+  deltaDir: 'up' | 'down'
+  trend: number[]
+  sub: string
+  tone: OpsKpiTone
+  icon: React.ReactNode
+}
+
+const OPS_HEADLINE_KPIS: OpsKpi[] = [
+  { label: 'Time-to-Productivity', value: 'Tag 9',  delta: '−5 Tage',     deltaDir: 'down', trend: [14,13.5,13,12,11.4,10.3,9.6,9.1,9], sub: 'vor KnowFlow: Tag 14',         tone: 'indigo',  icon: <Clock size={14} /> },
+  { label: 'Fehlerreduktion',       value: '−42 %', delta: 'vs. Vorjahr', deltaDir: 'down', trend: [100,96,89,82,76,70,64,60,58],         sub: 'Anfängerfehler · 90 Tage',     tone: 'emerald', icon: <ShieldCheck size={14} /> },
+  { label: 'Trainingszeit',         value: '−36 %', delta: '−14 h / MA',  deltaDir: 'down', trend: [40,38,36,33,31,28,26,25.5,25.3],      sub: 'pro Mitarbeiter · 1. Quartal', tone: 'amber',   icon: <Hourglass size={14} /> },
+  { label: 'Wissensabdeckung',      value: '91 %',  delta: '+24 pp',      deltaDir: 'up',   trend: [62,68,72,76,80,84,87,89,91],          sub: '24 kritische Areale gemappt',  tone: 'violet',  icon: <Layers size={14} /> },
+  { label: 'Produktivitätsgewinn',  value: '+18 %', delta: '+€ 412k p.a.',deltaDir: 'up',   trend: [100,103,106,109,112,114,116,117,118], sub: 'vs. Baseline Q1 2025',        tone: 'sky',     icon: <TrendingUp size={14} /> },
+  { label: 'Sicherheitsindex',      value: '99,4 %', delta: '+2,1 pp',    deltaDir: 'up',   trend: [96.5,97,97.4,97.9,98.3,98.7,99,99.2,99.4], sub: '0 Vorfälle · letzte 60 Tage', tone: 'rose',    icon: <ShieldAlert size={14} /> },
+]
+
+const OPS_BEFORE_AFTER: { metric: string; before: string; after: string; delta: string; deltaDir: 'up'|'down'; note: string }[] = [
+  { metric: 'Einarbeitungszeit (Tage bis produktiv)', before: '14',     after: '9',      delta: '−36 %',   deltaDir: 'down', note: 'Lukas Brandt · CNC-Fertigung Halle B' },
+  { metric: 'Anfängerfehler pro 100 Stk.',             before: '7,2',    after: '4,1',    delta: '−42 %',   deltaDir: 'down', note: 'CNC-200 · Q1/2026 vs. Q1/2025' },
+  { metric: 'Mentor-Stunden pro Neuzugang',            before: '38 h',   after: '21 h',   delta: '−45 %',   deltaDir: 'down', note: 'Heinz, Sven, Aylin · Senior-Pool' },
+  { metric: 'SOP-Konformität bei Audit',               before: '74 %',   after: '96 %',   delta: '+22 pp',  deltaDir: 'up',   note: 'TÜV-Vor-Audit · 17.05.2026' },
+  { metric: 'Wissensabdeckung kritischer Maschinen',   before: '67 %',   after: '91 %',   delta: '+24 pp',  deltaDir: 'up',   note: '24 von 26 Areale dokumentiert' },
+]
+
+interface ExpertRiskEntry {
+  name: string
+  initials: string
+  role: string
+  yearsExp: number
+  retiresIn: string
+  successors: number
+  knowledgeAreas: string[]
+  knowledgeEntries: number
+  coveragePct: number
+  risk: 'critical' | 'high' | 'medium'
+}
+
+const OPS_EXPERTS: ExpertRiskEntry[] = [
+  { name: 'Heinz Müller',  initials: 'HM', role: 'Senior CNC-Programmierer',  yearsExp: 28, retiresIn: '4 Monate',  successors: 0, knowledgeAreas: ['CNC-200 Spindel', 'Lager-Diagnose', 'Geräusch-Akustik'], knowledgeEntries: 142, coveragePct: 64, risk: 'critical' },
+  { name: 'Sven Krüger',   initials: 'SK', role: 'Hydraulik-Spezialist',      yearsExp: 22, retiresIn: '11 Monate', successors: 1, knowledgeAreas: ['Hydraulik-Diagnose', 'Ventil-Leckage', 'Druckkurven'],     knowledgeEntries: 88,  coveragePct: 41, risk: 'critical' },
+  { name: 'Aylin Demir',   initials: 'AD', role: 'Qualitätsleiterin',         yearsExp: 19, retiresIn: '2 Jahre',   successors: 2, knowledgeAreas: ['Stichproben-SOPs', 'Audit-Reviews', 'Reklamationen'],     knowledgeEntries: 71,  coveragePct: 78, risk: 'medium'   },
+  { name: 'Bernd Hoffmann',initials: 'BH', role: 'Instandhaltung Senior',     yearsExp: 31, retiresIn: '7 Monate',  successors: 1, knowledgeAreas: ['Pneumatik-Wartung', 'Elektrik-Diagnose'],                  knowledgeEntries: 64,  coveragePct: 52, risk: 'high'     },
+]
+
+interface KnowledgeGapEntry {
+  area: string
+  machines: number
+  expertsCount: number
+  sopStatus: 'fehlt' | 'teilweise' | 'vollständig'
+  risk: 'critical' | 'high' | 'medium' | 'low'
+  note: string
+}
+
+const OPS_KNOWLEDGE_GAPS: KnowledgeGapEntry[] = [
+  { area: 'CNC-200 Spezialwissen',  machines: 1, expertsCount: 2, sopStatus: 'teilweise',   risk: 'critical', note: 'Spindel-Akustik nicht dokumentiert · nur bei Heinz & Sven vorhanden' },
+  { area: 'Hydraulik-Diagnose',     machines: 4, expertsCount: 1, sopStatus: 'fehlt',       risk: 'critical', note: 'Sven Krüger einziger Experte · keine SOP vorhanden' },
+  { area: 'Roboter-Greifer R-12',   machines: 2, expertsCount: 3, sopStatus: 'teilweise',   risk: 'high',     note: 'Greifkraft-Kalibrierung nur in Notizen erfasst' },
+  { area: 'Pneumatik Halle C',      machines: 6, expertsCount: 2, sopStatus: 'teilweise',   risk: 'high',     note: 'Wartungsintervalle uneinheitlich dokumentiert' },
+  { area: 'Stanzwerkzeug-Wechsel',  machines: 3, expertsCount: 4, sopStatus: 'vollständig', risk: 'medium',   note: 'Erfahrungswissen zu Verschleißmustern ergänzen' },
+  { area: 'Mess-SOPs Q-Lab',        machines: 5, expertsCount: 5, sopStatus: 'vollständig', risk: 'low',      note: 'Audit-ready · monatliches Review' },
+]
+
+const OPS_COMPLIANCE_STATS: { label: string; value: string; sub: string; tone: OpsKpiTone; icon: React.ReactNode }[] = [
+  { label: 'Sicherheits­unter­weisungen',  value: '142 / 148', sub: '96 % abgeschlossen · 6 offen',     tone: 'emerald', icon: <ShieldCheck size={14} /> },
+  { label: 'SOP-Bestätigungen',            value: '1.284',     sub: 'in den letzten 30 Tagen',          tone: 'indigo',  icon: <FileCheck2 size={14} /> },
+  { label: 'Maschinen­freigaben',          value: '47 / 51',   sub: '4 Mitarbeiter ausstehend',         tone: 'amber',   icon: <BadgeCheck size={14} /> },
+  { label: 'Audit-Status',                 value: 'Audit-ready', sub: 'TÜV-Vor-Audit · 17.05.2026',     tone: 'violet',  icon: <ScrollText size={14} /> },
+]
+
+interface ComplianceEvent {
+  date: string
+  time: string
+  employee: string
+  initials: string
+  action: string
+  ref: string
+  status: 'verified' | 'pending' | 'expired'
+}
+
+const OPS_COMPLIANCE_TIMELINE: ComplianceEvent[] = [
+  { date: '18.05.', time: '09:42', employee: 'Lukas Brandt',    initials: 'LB', action: 'Sicherheits­unterweisung · CNC-200',     ref: 'SU-2026-142', status: 'verified' },
+  { date: '18.05.', time: '08:15', employee: 'Mara Schultz',     initials: 'MS', action: 'SOP-Bestätigung · Lagerwechsel',        ref: 'SOP-CNC-018', status: 'verified' },
+  { date: '17.05.', time: '16:30', employee: 'Lukas Brandt',    initials: 'LB', action: 'Maschinenfreigabe · CNC-200 (Stufe 1)', ref: 'MF-CNC-200',  status: 'verified' },
+  { date: '17.05.', time: '14:11', employee: 'TÜV-Vor-Audit',   initials: 'TV', action: 'Compliance-Review · alle SOPs',          ref: 'AUD-Q2-26',   status: 'verified' },
+  { date: '17.05.', time: '11:02', employee: 'Tomasz Wójcik',   initials: 'TW', action: 'SOP-Bestätigung · Hydraulik-Wechsel',    ref: 'SOP-HYD-007', status: 'pending'  },
+  { date: '16.05.', time: '13:55', employee: 'Aylin Demir',     initials: 'AD', action: 'Audit-Trail-Review unterzeichnet',       ref: 'AUD-Q2-26',   status: 'verified' },
+]
+
+const OPS_COMPLIANCE_MATRIX: { employee: string; initials: string; role: string; safety: 'done'|'progress'|'pending'; sop: 'done'|'progress'|'pending'; machine: 'done'|'progress'|'pending'; audit: 'done'|'progress'|'pending' }[] = [
+  { employee: 'Lukas Brandt',   initials: 'LB', role: 'Maschinen­bediener i.A.',    safety: 'done',     sop: 'progress', machine: 'progress', audit: 'pending' },
+  { employee: 'Mara Schultz',   initials: 'MS', role: 'CNC-Operatorin',              safety: 'done',     sop: 'done',     machine: 'done',     audit: 'done'    },
+  { employee: 'Tomasz Wójcik',  initials: 'TW', role: 'Hydraulik-Tech.',             safety: 'done',     sop: 'progress', machine: 'pending',  audit: 'pending' },
+  { employee: 'Heinz Müller',   initials: 'HM', role: 'Senior CNC',                  safety: 'done',     sop: 'done',     machine: 'done',     audit: 'done'    },
+  { employee: 'Aylin Demir',    initials: 'AD', role: 'QS-Leitung',                  safety: 'done',     sop: 'done',     machine: 'done',     audit: 'done'    },
+  { employee: 'Bernd Hoffmann', initials: 'BH', role: 'Instandhaltung',              safety: 'done',     sop: 'done',     machine: 'progress', audit: 'progress'},
+]
+
+/* -------------------------- Operations · Main ---------------------------- */
+
+function Operations() {
+  return (
+    <div className="relative -mt-2">
+      <div className="relative rounded-3xl overflow-hidden border border-zinc-800/80 bg-zinc-950 text-zinc-100 kf-canvas-fade">
+        {/* Aurora + grid */}
+        <div className="absolute inset-0 kf-ops-grid pointer-events-none opacity-60" />
+        <div className="kf-aurora bg-indigo-600/25" style={{ top: -120, left: '8%', width: 480, height: 480 }} />
+        <div className="kf-aurora bg-fuchsia-600/20" style={{ top: 240, right: '6%', width: 520, height: 520, animationDelay: '3.5s' }} />
+        <div className="kf-aurora bg-sky-600/20" style={{ top: 900, left: '40%', width: 460, height: 460, animationDelay: '6s' }} />
+
+        <div className="relative p-6 lg:p-10 space-y-12">
+          <OperationsHero />
+          <RoiSection />
+          <KnowledgeLossSection />
+          <ComplianceSection />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* -------------------------- Operations · Hero ---------------------------- */
+
+function OperationsHero() {
+  return (
+    <div className="relative">
+      {/* Top row */}
+      <div className="flex flex-wrap items-center gap-2 text-[10.5px]">
+        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-400/25 text-emerald-300 font-medium">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-70 animate-ping" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+          </span>
+          Live-Snapshot · 18.05.2026 · 09:42
+        </span>
+        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full border border-white/10 bg-white/[0.04] text-zinc-300">
+          <Building2 size={11} /> Standort Mainz-Bischofsheim
+        </span>
+        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full border border-indigo-400/30 bg-indigo-500/10 text-indigo-200 font-medium">
+          <Gauge size={11} /> Werksleitung · Fabienne S.
+        </span>
+        <span className="ml-auto inline-flex items-center gap-1.5 px-2 py-1 rounded-full border border-white/10 bg-white/[0.04] text-zinc-300">
+          <Lock size={11} /> SOC 2 · ISO 27001 · audit-ready
+        </span>
+      </div>
+
+      {/* Headline */}
+      <div className="mt-5 grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
+        <div className="lg:col-span-7">
+          <h1 className="text-3xl lg:text-[40px] font-semibold tracking-tight text-white leading-[1.05]">
+            Das operative <span className="kf-grad-text">Betriebssystem</span> für Wissens­sicherung
+            <br className="hidden lg:block" /> und KI-gestützte Einarbeitung.
+          </h1>
+          <p className="mt-3 max-w-2xl text-[14px] text-zinc-400 leading-relaxed">
+            KnowFlow verwandelt das Erfahrungswissen Ihrer Senior-Operatoren in messbaren Business-Impact —
+            <span className="text-zinc-200"> weniger Fehler, schnellere Einarbeitung, audit-ready Compliance.</span>
+          </p>
+        </div>
+        <div className="lg:col-span-5 flex flex-wrap items-center justify-start lg:justify-end gap-2">
+          <button className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-zinc-100 text-[12.5px] transition">
+            <Download size={13} /> ROI-Report · PDF
+          </button>
+          <button className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white text-zinc-900 hover:bg-zinc-100 text-[12.5px] font-medium transition kf-cta-glow">
+            <ScrollText size={13} /> Audit-Trail öffnen
+          </button>
+        </div>
+      </div>
+
+      {/* Headline KPI strip */}
+      <div className="mt-7 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+        {OPS_HEADLINE_KPIS.map((k, i) => <OpsKpiCard key={k.label} kpi={k} delay={i * 70} />)}
+      </div>
+    </div>
+  )
+}
+
+const OPS_TONE: Record<OpsKpiTone, { text: string; chip: string; line: string; bar: string; bg: string }> = {
+  indigo:  { text: 'text-indigo-200',  chip: 'text-indigo-300  bg-indigo-500/10  border-indigo-400/25',  line: 'stroke-indigo-300',  bar: 'bg-indigo-400',  bg: 'from-indigo-500/[0.10]'  },
+  emerald: { text: 'text-emerald-200', chip: 'text-emerald-300 bg-emerald-500/10 border-emerald-400/25', line: 'stroke-emerald-300', bar: 'bg-emerald-400', bg: 'from-emerald-500/[0.10]' },
+  amber:   { text: 'text-amber-200',   chip: 'text-amber-300   bg-amber-500/10   border-amber-400/25',   line: 'stroke-amber-300',   bar: 'bg-amber-400',   bg: 'from-amber-500/[0.10]'   },
+  rose:    { text: 'text-rose-200',    chip: 'text-rose-300    bg-rose-500/10    border-rose-400/25',    line: 'stroke-rose-300',    bar: 'bg-rose-400',    bg: 'from-rose-500/[0.10]'    },
+  sky:     { text: 'text-sky-200',     chip: 'text-sky-300     bg-sky-500/10     border-sky-400/25',     line: 'stroke-sky-300',     bar: 'bg-sky-400',     bg: 'from-sky-500/[0.10]'     },
+  violet:  { text: 'text-violet-200',  chip: 'text-violet-300  bg-violet-500/10  border-violet-400/25',  line: 'stroke-violet-300',  bar: 'bg-violet-400',  bg: 'from-violet-500/[0.10]'  },
+}
+
+function OpsKpiCard({ kpi, delay }: { kpi: OpsKpi; delay: number }) {
+  const t = OPS_TONE[kpi.tone]
+  const isUp = kpi.deltaDir === 'up'
+  return (
+    <div
+      className={cls('relative rounded-2xl border border-white/8 bg-gradient-to-br to-transparent overflow-hidden kf-pop p-4 hover:border-white/15 transition', t.bg)}
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <div className="flex items-center gap-2 text-[10.5px] font-semibold uppercase tracking-wider">
+        <span className={cls('inline-flex items-center justify-center h-6 w-6 rounded-lg border', t.chip)}>{kpi.icon}</span>
+        <span className="text-zinc-400 truncate">{kpi.label}</span>
+      </div>
+      <div className="mt-3 flex items-baseline gap-2">
+        <div className={cls('text-2xl font-semibold tabular-nums tracking-tight', t.text)}>{kpi.value}</div>
+        <div className={cls('inline-flex items-center gap-0.5 text-[11px] font-semibold', isUp ? 'text-emerald-300' : 'text-emerald-300')}>
+          {isUp ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />} {kpi.delta}
+        </div>
+      </div>
+      <div className="mt-2 text-[11px] text-zinc-500">{kpi.sub}</div>
+      <OpsSparkline values={kpi.trend} tone={kpi.tone} />
+    </div>
+  )
+}
+
+function OpsSparkline({ values, tone }: { values: number[]; tone: OpsKpiTone }) {
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  const range = max - min || 1
+  const w = 100
+  const h = 28
+  const pts = values.map((v, i) => {
+    const x = (i / (values.length - 1)) * w
+    const y = h - ((v - min) / range) * h
+    return `${x.toFixed(1)},${y.toFixed(1)}`
+  })
+  const line = `M ${pts.join(' L ')}`
+  const area = `${line} L ${w},${h} L 0,${h} Z`
+  const t = OPS_TONE[tone]
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="mt-3 w-full h-7" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id={`ops-grad-${tone}`} x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="currentColor" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={area} fill={`url(#ops-grad-${tone})`} className={t.line} />
+      <path d={line} fill="none" strokeWidth={1.4} className={t.line} />
+    </svg>
+  )
+}
+
+/* ----------------------- A · ROI Dashboard Section ------------------------ */
+
+function RoiSection() {
+  return (
+    <section className="relative">
+      <OpsSectionHeader
+        eyebrow="A · ROI Dashboard"
+        title="Business Impact, gemessen in Tagen, Euro und Audit-Quoten"
+        right={
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-zinc-400">
+            <Calendar size={11} /> Auswertungsfenster: Q1 2026 · 12 Wochen
+          </span>
+        }
+      />
+
+      {/* Detailed KPI explanations */}
+      <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <RoiExplainCard
+          tone="indigo"
+          icon={<Clock size={14} />}
+          label="Time-to-Productivity"
+          headline="Tag 9 statt Tag 14"
+          breakdown={[
+            { k: 'Klassisches Onboarding', v: '14 Tage' },
+            { k: 'mit KnowFlow', v: '9 Tage' },
+            { k: 'Differenz pro MA', v: '5 Tage · ≈ 38 h' },
+          ]}
+          impact="≈ € 1.470 Mehrwert pro Neuzugang · 27 Neuzugänge p.a."
+        />
+        <RoiExplainCard
+          tone="emerald"
+          icon={<ShieldCheck size={14} />}
+          label="Fehlerreduktion"
+          headline="−42 % Anfängerfehler"
+          breakdown={[
+            { k: 'Vorher (90 Tage)',  v: '7,2 / 100 Stk.' },
+            { k: 'Nachher (90 Tage)', v: '4,1 / 100 Stk.' },
+            { k: 'Ausschuss vermieden', v: '≈ 18.400 Stk.' },
+          ]}
+          impact="≈ € 218k weniger Ausschusskosten p.a."
+        />
+        <RoiExplainCard
+          tone="violet"
+          icon={<Layers size={14} />}
+          label="Wissensabdeckung"
+          headline="91 % kritischer Areale"
+          breakdown={[
+            { k: 'Maschinen-Areale gemappt', v: '24 / 26' },
+            { k: 'Senior-Wissen extrahiert',  v: '142 Einträge' },
+            { k: 'Offene Lücken',             v: '2 kritisch · 4 hoch' },
+          ]}
+          impact="Wissensverlust vor Heinz' Rente: −82 %"
+        />
+      </div>
+
+      {/* Before / After block */}
+      <div className="mt-6 rounded-2xl border border-white/8 bg-white/[0.02] p-5 lg:p-6">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center kf-neon">
+            <PercentSquare size={14} className="text-white" />
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.18em] text-indigo-300 font-semibold">Vorher / Nachher</div>
+            <div className="text-base font-semibold text-white">Direkter Vergleich · Q1 2025 vs. Q1 2026</div>
+          </div>
+          <span className="ml-auto inline-flex items-center gap-1.5 text-[11px] text-zinc-400">
+            <LineChart size={11} className="text-indigo-300" /> Quelle: KnowFlow Analytics · MES-Sync alle 15 min
+          </span>
+        </div>
+
+        <div className="mt-5 space-y-2.5">
+          {OPS_BEFORE_AFTER.map((b, i) => <BeforeAfterRow key={b.metric} row={b} index={i} />)}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function RoiExplainCard({
+  tone, icon, label, headline, breakdown, impact,
+}: {
+  tone: OpsKpiTone
+  icon: React.ReactNode
+  label: string
+  headline: string
+  breakdown: { k: string; v: string }[]
+  impact: string
+}) {
+  const t = OPS_TONE[tone]
+  return (
+    <div className="relative rounded-2xl kf-glass p-5 overflow-hidden">
+      <div className={cls('absolute -top-16 -right-16 h-36 w-36 rounded-full blur-3xl', t.bar.replace('bg-', 'bg-'), 'opacity-20')} />
+      <div className="relative flex items-center gap-2">
+        <span className={cls('inline-flex items-center justify-center h-7 w-7 rounded-lg border', t.chip)}>{icon}</span>
+        <span className="text-[10.5px] uppercase tracking-[0.18em] text-zinc-400 font-semibold">{label}</span>
+      </div>
+      <div className={cls('mt-3 text-2xl font-semibold tracking-tight', t.text)}>{headline}</div>
+
+      <ul className="mt-4 space-y-1.5 text-[12.5px] border-t border-white/5 pt-3">
+        {breakdown.map((b) => (
+          <li key={b.k} className="flex items-center justify-between gap-3">
+            <span className="text-zinc-400">{b.k}</span>
+            <span className="text-zinc-100 font-medium tabular-nums">{b.v}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-4 rounded-lg border border-white/8 bg-white/[0.03] p-2.5">
+        <div className="flex items-center gap-1.5 text-[10.5px] uppercase tracking-wider text-emerald-300 font-semibold">
+          <TrendingUp size={11} /> Business Impact
+        </div>
+        <div className="mt-0.5 text-[12.5px] text-zinc-100 font-medium">{impact}</div>
+      </div>
+    </div>
+  )
+}
+
+function BeforeAfterRow({ row, index }: { row: typeof OPS_BEFORE_AFTER[number]; index: number }) {
+  return (
+    <div
+      className="grid grid-cols-12 items-center gap-3 rounded-xl border border-white/8 bg-white/[0.02] p-3.5 kf-pop"
+      style={{ animationDelay: `${index * 60}ms` }}
+    >
+      <div className="col-span-12 md:col-span-5">
+        <div className="text-[13px] font-medium text-white">{row.metric}</div>
+        <div className="text-[11px] text-zinc-500 mt-0.5">{row.note}</div>
+      </div>
+      <div className="col-span-5 md:col-span-3 flex items-center gap-2">
+        <div className="text-[10px] uppercase tracking-wider text-zinc-500 w-12 shrink-0">Vorher</div>
+        <div className="flex-1 h-1.5 rounded-full bg-white/8 overflow-hidden">
+          <div className="h-full bg-zinc-500/70 w-full" />
+        </div>
+        <div className="text-[12px] text-zinc-300 tabular-nums w-14 text-right">{row.before}</div>
+      </div>
+      <div className="col-span-5 md:col-span-3 flex items-center gap-2">
+        <div className="text-[10px] uppercase tracking-wider text-indigo-300 w-12 shrink-0">Nachher</div>
+        <div className="flex-1 h-1.5 rounded-full bg-indigo-500/15 overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-indigo-400 to-fuchsia-400 w-full kf-bar-fill" />
+        </div>
+        <div className="text-[12px] text-white tabular-nums w-14 text-right font-medium">{row.after}</div>
+      </div>
+      <div className="col-span-2 md:col-span-1 flex justify-end">
+        <span className={cls(
+          'inline-flex items-center gap-0.5 text-[11px] font-semibold px-2 py-0.5 rounded-md border',
+          row.deltaDir === 'up' ? 'text-emerald-300 bg-emerald-500/10 border-emerald-400/25' : 'text-emerald-300 bg-emerald-500/10 border-emerald-400/25',
+        )}>
+          {row.deltaDir === 'up' ? <ArrowUpRight size={11} /> : <ArrowDownRight size={11} />} {row.delta}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+/* ----------------- B · Knowledge Loss Risk Section ----------------------- */
+
+const RISK_BADGE: Record<'critical' | 'high' | 'medium' | 'low', string> = {
+  critical: 'text-rose-200    bg-rose-500/15    border-rose-400/30',
+  high:     'text-orange-200  bg-orange-500/15  border-orange-400/30',
+  medium:   'text-amber-200   bg-amber-500/15   border-amber-400/30',
+  low:      'text-emerald-200 bg-emerald-500/15 border-emerald-400/30',
+}
+
+const RISK_LABEL: Record<'critical' | 'high' | 'medium' | 'low', string> = {
+  critical: 'Kritisch',
+  high:     'Hoch',
+  medium:   'Mittel',
+  low:      'Niedrig',
+}
+
+function KnowledgeLossSection() {
+  return (
+    <section className="relative">
+      <OpsSectionHeader
+        eyebrow="B · Wissensverlust-Risiko"
+        title="Kritisches Erfahrungswissen — heute identifizieren, bevor es geht"
+        right={
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-rose-300">
+            <AlertOctagon size={11} /> 2 Senior-Experten in &lt; 12 Monaten
+          </span>
+        }
+      />
+
+      {/* Expert risk grid */}
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        {OPS_EXPERTS.map((e, i) => <ExpertRiskCard key={e.name} expert={e} delay={i * 80} />)}
+      </div>
+
+      {/* Knowledge gap heatmap */}
+      <div className="mt-6 rounded-2xl kf-glass p-5 lg:p-6 relative overflow-hidden">
+        <div className="absolute -top-20 -right-20 h-44 w-44 rounded-full bg-rose-500/15 blur-3xl" />
+        <div className="relative flex flex-wrap items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-rose-500 to-fuchsia-500 flex items-center justify-center kf-neon">
+            <Radar size={14} className="text-white" />
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.18em] text-rose-300 font-semibold">Heatmap · Wissenslücken</div>
+            <div className="text-base font-semibold text-white">Areale ohne ausreichende Wissensabdeckung</div>
+          </div>
+          <span className="ml-auto inline-flex items-center gap-1.5 text-[11px] text-zinc-400">
+            <Filter size={11} /> sortiert nach Risiko
+          </span>
+        </div>
+
+        <div className="relative mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+          {OPS_KNOWLEDGE_GAPS.map((g, i) => <KnowledgeGapCard key={g.area} gap={g} delay={i * 60} />)}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function ExpertRiskCard({ expert, delay }: { expert: ExpertRiskEntry; delay: number }) {
+  const isCritical = expert.risk === 'critical'
+  return (
+    <div
+      className={cls(
+        'relative rounded-2xl border bg-gradient-to-br to-transparent kf-pop overflow-hidden hover:translate-y-[-1px] transition',
+        isCritical ? 'border-rose-400/30 from-rose-500/[0.08]' : expert.risk === 'high' ? 'border-orange-400/25 from-orange-500/[0.06]' : 'border-amber-400/20 from-amber-500/[0.05]',
+      )}
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      {isCritical && <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-rose-400 via-fuchsia-400 to-rose-400 kf-neon-glow" />}
+      <div className="p-5">
+        <div className="flex items-start gap-3">
+          <div className={cls(
+            'h-10 w-10 rounded-xl flex items-center justify-center text-[12px] font-semibold shrink-0 border',
+            isCritical ? 'bg-rose-500/15 border-rose-400/30 text-rose-200' : 'bg-white/5 border-white/15 text-zinc-200',
+          )}>
+            {expert.initials}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[14px] font-semibold text-white truncate">{expert.name}</div>
+            <div className="text-[11.5px] text-zinc-400 truncate">{expert.role}</div>
+          </div>
+          <span className={cls('inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border uppercase tracking-wider', RISK_BADGE[expert.risk])}>
+            <ShieldAlert size={10} /> {RISK_LABEL[expert.risk]}
+          </span>
+        </div>
+
+        <div className="mt-4 grid grid-cols-3 gap-2 text-[11px]">
+          <div className="rounded-lg border border-white/8 bg-white/[0.02] px-2 py-2">
+            <div className="text-[9.5px] uppercase tracking-wider text-zinc-500">Erfahrung</div>
+            <div className="text-white font-semibold tabular-nums mt-0.5">{expert.yearsExp} J.</div>
+          </div>
+          <div className="rounded-lg border border-white/8 bg-white/[0.02] px-2 py-2">
+            <div className="text-[9.5px] uppercase tracking-wider text-zinc-500">Rente in</div>
+            <div className={cls('font-semibold tabular-nums mt-0.5', isCritical ? 'text-rose-200' : 'text-zinc-100')}>{expert.retiresIn}</div>
+          </div>
+          <div className="rounded-lg border border-white/8 bg-white/[0.02] px-2 py-2">
+            <div className="text-[9.5px] uppercase tracking-wider text-zinc-500">Nachfolger</div>
+            <div className={cls('font-semibold tabular-nums mt-0.5', expert.successors === 0 ? 'text-rose-200' : 'text-zinc-100')}>
+              {expert.successors === 0 ? 'keiner' : expert.successors}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <div className="flex items-center justify-between text-[10.5px] uppercase tracking-wider text-zinc-500 mb-1">
+            <span>Wissensabdeckung</span>
+            <span className="tabular-nums text-zinc-300">{expert.coveragePct} %</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-white/8 overflow-hidden">
+            <div
+              className={cls(
+                'h-full kf-bar-fill rounded-full',
+                expert.coveragePct < 50 ? 'bg-gradient-to-r from-rose-400 to-fuchsia-400'
+                : expert.coveragePct < 75 ? 'bg-gradient-to-r from-amber-400 to-orange-400'
+                : 'bg-gradient-to-r from-emerald-400 to-teal-400',
+              )}
+              style={{ width: `${expert.coveragePct}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {expert.knowledgeAreas.map((a) => (
+            <span key={a} className="text-[10px] px-1.5 py-0.5 rounded-md border border-white/10 bg-white/[0.04] text-zinc-300">{a}</span>
+          ))}
+        </div>
+
+        <div className="mt-4 flex items-center justify-between text-[11px]">
+          <span className="text-zinc-500">{expert.knowledgeEntries} Wissens­einträge erfasst</span>
+          <button className="inline-flex items-center gap-1 text-zinc-200 hover:text-white">
+            Interview planen <ArrowRight size={11} />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function KnowledgeGapCard({ gap, delay }: { gap: KnowledgeGapEntry; delay: number }) {
+  const isCritical = gap.risk === 'critical'
+  const tone =
+    gap.risk === 'critical' ? 'border-rose-400/30 bg-rose-500/[0.08]'
+    : gap.risk === 'high' ? 'border-orange-400/25 bg-orange-500/[0.06]'
+    : gap.risk === 'medium' ? 'border-amber-400/20 bg-amber-500/[0.04]'
+    : 'border-emerald-400/20 bg-emerald-500/[0.04]'
+  return (
+    <div
+      className={cls('relative rounded-xl border p-3.5 kf-pop overflow-hidden', tone)}
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      {isCritical && <div className="absolute -top-12 -right-12 h-24 w-24 rounded-full bg-rose-500/20 blur-2xl" />}
+      <div className="relative flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="text-[13px] font-semibold text-white truncate">{gap.area}</div>
+          <div className="text-[11px] text-zinc-400 mt-0.5">{gap.note}</div>
+        </div>
+        <span className={cls('inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border uppercase tracking-wider shrink-0', RISK_BADGE[gap.risk])}>
+          {RISK_LABEL[gap.risk]}
+        </span>
+      </div>
+      <div className="relative mt-3 flex items-center gap-3 text-[11px] text-zinc-400">
+        <span className="inline-flex items-center gap-1"><Factory size={11} /> {gap.machines} Maschinen</span>
+        <span className="inline-flex items-center gap-1"><Users size={11} /> {gap.expertsCount} {gap.expertsCount === 1 ? 'Experte' : 'Experten'}</span>
+        <span className={cls(
+          'ml-auto inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-medium px-1.5 py-0.5 rounded border',
+          gap.sopStatus === 'fehlt' ? 'border-rose-400/25 bg-rose-500/10 text-rose-200'
+          : gap.sopStatus === 'teilweise' ? 'border-amber-400/25 bg-amber-500/10 text-amber-200'
+          : 'border-emerald-400/25 bg-emerald-500/10 text-emerald-200',
+        )}>
+          <FileText size={10} /> SOP {gap.sopStatus}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+/* ------------------ C · Compliance & Audit Section ----------------------- */
+
+function ComplianceSection() {
+  return (
+    <section className="relative">
+      <OpsSectionHeader
+        eyebrow="C · Compliance & Audit"
+        title="Trainingsstatus, SOP-Bestätigungen und Audit-Trail in einer Ansicht"
+        right={
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-300">
+            <BadgeCheck size={11} /> Audit-ready · TÜV-Vor-Audit bestanden
+          </span>
+        }
+      />
+
+      {/* Compliance KPI strip */}
+      <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {OPS_COMPLIANCE_STATS.map((s, i) => (
+          <div
+            key={s.label}
+            className={cls('relative rounded-2xl border border-white/8 bg-gradient-to-br to-transparent p-4 kf-pop overflow-hidden', OPS_TONE[s.tone].bg)}
+            style={{ animationDelay: `${i * 70}ms` }}
+          >
+            <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-wider font-semibold">
+              <span className={cls('inline-flex items-center justify-center h-6 w-6 rounded-lg border', OPS_TONE[s.tone].chip)}>{s.icon}</span>
+              <span className="text-zinc-400">{s.label}</span>
+            </div>
+            <div className={cls('mt-3 text-xl font-semibold tabular-nums', OPS_TONE[s.tone].text)}>{s.value}</div>
+            <div className="mt-1 text-[11px] text-zinc-500">{s.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-6 grid grid-cols-1 xl:grid-cols-12 gap-4">
+        {/* Timeline */}
+        <div className="xl:col-span-7 rounded-2xl kf-glass p-5 lg:p-6 relative overflow-hidden">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center kf-neon">
+              <GanttChartSquare size={14} className="text-white" />
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-emerald-300 font-semibold">Audit-Trail · Live</div>
+              <div className="text-base font-semibold text-white">Verifizierte Compliance-Events</div>
+            </div>
+            <span className="ml-auto inline-flex items-center gap-1.5 text-[11px] text-zinc-400">
+              <Lock size={11} /> kryptografisch signiert
+            </span>
+          </div>
+
+          <ol className="mt-5 space-y-3">
+            {OPS_COMPLIANCE_TIMELINE.map((e, i) => <ComplianceTimelineRow key={e.ref + i} event={e} index={i} />)}
+          </ol>
+        </div>
+
+        {/* Matrix */}
+        <div className="xl:col-span-5 rounded-2xl kf-glass p-5 lg:p-6 relative overflow-hidden">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center kf-neon">
+              <BadgeCheck size={14} className="text-white" />
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-indigo-300 font-semibold">Trainings-Matrix</div>
+              <div className="text-base font-semibold text-white">Pro Mitarbeiter · Audit-Status</div>
+            </div>
+          </div>
+
+          <div className="mt-5 rounded-xl border border-white/8 overflow-hidden">
+            <div className="grid grid-cols-7 px-3 py-2 text-[10px] uppercase tracking-wider text-zinc-500 bg-white/[0.03] border-b border-white/8 font-semibold">
+              <div className="col-span-3">Mitarbeiter</div>
+              <div className="col-span-1 text-center">Sicherh.</div>
+              <div className="col-span-1 text-center">SOP</div>
+              <div className="col-span-1 text-center">Mach.</div>
+              <div className="col-span-1 text-center">Audit</div>
+            </div>
+            {OPS_COMPLIANCE_MATRIX.map((r) => (
+              <div key={r.employee} className="grid grid-cols-7 px-3 py-2.5 items-center border-b border-white/5 last:border-b-0 text-[12px]">
+                <div className="col-span-3 flex items-center gap-2 min-w-0">
+                  <div className="h-6 w-6 rounded-md bg-white/[0.04] border border-white/10 flex items-center justify-center text-[10px] font-semibold text-zinc-300 shrink-0">{r.initials}</div>
+                  <div className="min-w-0">
+                    <div className="text-white truncate">{r.employee}</div>
+                    <div className="text-[10px] text-zinc-500 truncate">{r.role}</div>
+                  </div>
+                </div>
+                <div className="col-span-1 flex justify-center"><MatrixDot status={r.safety} /></div>
+                <div className="col-span-1 flex justify-center"><MatrixDot status={r.sop} /></div>
+                <div className="col-span-1 flex justify-center"><MatrixDot status={r.machine} /></div>
+                <div className="col-span-1 flex justify-center"><MatrixDot status={r.audit} /></div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-[10.5px] text-zinc-400">
+            <span className="inline-flex items-center gap-1"><MatrixDot status="done" /> abgeschlossen</span>
+            <span className="inline-flex items-center gap-1"><MatrixDot status="progress" /> in Arbeit</span>
+            <span className="inline-flex items-center gap-1"><MatrixDot status="pending" /> ausstehend</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function MatrixDot({ status }: { status: 'done' | 'progress' | 'pending' }) {
+  if (status === 'done') {
+    return (
+      <span className="h-5 w-5 rounded-full bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center">
+        <CheckCircle2 size={11} className="text-emerald-300" />
+      </span>
+    )
+  }
+  if (status === 'progress') {
+    return (
+      <span className="h-5 w-5 rounded-full bg-amber-500/15 border border-amber-400/30 flex items-center justify-center">
+        <CircleDot size={10} className="text-amber-300" />
+      </span>
+    )
+  }
+  return <span className="h-2 w-2 rounded-full bg-white/15 border border-white/15" />
+}
+
+function ComplianceTimelineRow({ event, index }: { event: ComplianceEvent; index: number }) {
+  const isVerified = event.status === 'verified'
+  return (
+    <li
+      className="relative grid grid-cols-12 gap-3 items-start kf-step-tick"
+      style={{ animationDelay: `${index * 60}ms` }}
+    >
+      <div className="col-span-2 text-[11px] tabular-nums text-zinc-500 pt-1">
+        <div className="text-zinc-300 font-medium">{event.date}</div>
+        <div>{event.time}</div>
+      </div>
+      <div className="col-span-1 relative flex justify-center pt-1">
+        <span className={cls(
+          'h-5 w-5 rounded-full flex items-center justify-center border',
+          isVerified ? 'bg-emerald-500/15 border-emerald-400/30 text-emerald-300'
+          : event.status === 'pending' ? 'bg-amber-500/15 border-amber-400/30 text-amber-300'
+          : 'bg-rose-500/15 border-rose-400/30 text-rose-300',
+        )}>
+          {isVerified ? <CheckCircle2 size={11} /> : event.status === 'pending' ? <CircleDot size={9} /> : <XCircle size={10} />}
+        </span>
+        {index < OPS_COMPLIANCE_TIMELINE.length - 1 && (
+          <div className="absolute top-7 bottom-[-12px] w-px bg-gradient-to-b from-white/15 to-transparent" />
+        )}
+      </div>
+      <div className="col-span-9 rounded-xl border border-white/8 bg-white/[0.02] p-3 hover:bg-white/[0.04] transition">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="h-6 w-6 rounded-md bg-white/[0.04] border border-white/10 flex items-center justify-center text-[10px] font-semibold text-zinc-300">{event.initials}</div>
+          <div className="text-[13px] font-medium text-white">{event.employee}</div>
+          <span className={cls(
+            'text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border',
+            isVerified ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200'
+            : event.status === 'pending' ? 'border-amber-400/30 bg-amber-500/10 text-amber-200'
+            : 'border-rose-400/30 bg-rose-500/10 text-rose-200',
+          )}>
+            {isVerified ? 'verifiziert' : event.status === 'pending' ? 'ausstehend' : 'abgelaufen'}
+          </span>
+          <span className="ml-auto text-[10.5px] text-zinc-500 tabular-nums">{event.ref}</span>
+        </div>
+        <div className="mt-1 text-[12.5px] text-zinc-300">{event.action}</div>
+      </div>
+    </li>
+  )
+}
+
+function OpsSectionHeader({ eyebrow, title, right }: { eyebrow: string; title: string; right?: React.ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-3 border-b border-white/8 pb-4">
+      <div>
+        <div className="text-[10px] uppercase tracking-[0.22em] text-indigo-300 font-semibold">{eyebrow}</div>
+        <h2 className="mt-1 text-xl lg:text-2xl font-semibold text-white tracking-tight leading-snug">{title}</h2>
+      </div>
+      {right}
+    </div>
+  )
+}
+
+/* ============================================================================
+   Wissensaufnahme · AI Knowledge OS  (Phase 2)
+   ============================================================================ */
+
+// ----------- Types --------------------------------------------------------
+
+type IntervTab = 'live' | 'extract' | 'graph' | 'impact'
+type IntervSpeaker = 'heinz' | 'ai'
+type IntervRisk = 'safety' | 'quality' | 'maintenance'
+type IntervTurn = {
+  id: string
+  speaker: IntervSpeaker
+  time: string
+  text: string
+  topic?: string
+  risk?: IntervRisk
+  machine?: string
+  classification?: string
+}
+
+type ExtractCategory =
+  | 'safety'
+  | 'beginner_mistake'
+  | 'sop_extension'
+  | 'rule'
+  | 'maintenance'
+  | 'best_practice'
+type ExtractedItem = {
+  id: string
+  category: ExtractCategory
+  title: string
+  body: string
+  machine: string
+  sources: string[]      // turn ids
+  confidence: number     // 0-100
+  sopRef?: string
+  status: 'new' | 'sop_extension' | 'critical'
+}
+
+type GraphNodeKind = 'expert' | 'machine' | 'sop' | 'risk' | 'error' | 'rule'
+type GraphNode = {
+  id: string
+  kind: GraphNodeKind
+  label: string
+  sub?: string
+  x: number
+  y: number
+  r?: number
+}
+type GraphEdgeKind = 'creates' | 'operates' | 'prevents' | 'mentions' | 'extends' | 'mitigates' | 'causes'
+type GraphEdge = {
+  from: string
+  to: string
+  label?: string
+  kind: GraphEdgeKind
+}
+
+type ImpactTone = 'indigo' | 'emerald' | 'amber' | 'rose' | 'sky' | 'violet'
+type ImpactKpi = {
+  label: string
+  value: string
+  unit?: string
+  delta?: string
+  deltaDir?: 'up' | 'down'
+  tone: ImpactTone
+  sub?: string
+}
+
+// ----------- Data --------------------------------------------------------
+
+const INTERVIEW_TURNS: IntervTurn[] = [
+  { id: 't01', speaker: 'ai',    time: '08:42:11', text: 'Heinz, du hast heute morgen vom Lager­wechsel an CNC-200 gesprochen. Woran erkennst du als erstes, dass es so weit ist?' },
+  { id: 't02', speaker: 'heinz', time: '08:42:24', text: 'Das hörst du. Die Spindel hat in den ersten zehn Minuten so ein leichtes Ticken, fast wie ein Klacken. Wenn das nach drei Tagen nicht weg ist, ist das Lager fertig.', topic: 'Spindel-Akustik', machine: 'CNC-200', risk: 'maintenance', classification: 'Erfahrungs­wissen · akustisch' },
+  { id: 't03', speaker: 'ai',    time: '08:43:02', text: 'Und welche Frequenz ungefähr? Hast du eine Esels­brücke für neue Operatoren?' },
+  { id: 't04', speaker: 'heinz', time: '08:43:18', text: 'Ich sag immer: brummt\'s wie ein alter Lkw, alles gut. Klickt\'s wie eine Schreib­maschine, sofort Schicht­leiter holen.', topic: 'Spindel-Akustik', machine: 'CNC-200', classification: 'Heuristik · „Schreib­maschinen"-Regel' },
+  { id: 't05', speaker: 'heinz', time: '08:44:01', text: 'Und ganz wichtig: vorher den Kühlmittel­druck checken. Wenn der unter 4 bar ist, bekommst du Vibrationen im Werkstück. Das vergessen alle Neuen.', topic: 'Kühlmittel', machine: 'CNC-200', risk: 'safety', classification: 'Anfänger­fehler · quantifizierbar' },
+  { id: 't06', speaker: 'ai',    time: '08:44:34', text: 'Du hast „alle Neuen" gesagt — wie oft ist das in den letzten 6 Monaten konkret passiert?' },
+  { id: 't07', speaker: 'heinz', time: '08:44:48', text: 'Mh, mindestens viermal. Lukas hatte das im März, da gab\'s Ausschuss von 12 Teilen.', topic: 'Kühlmittel', machine: 'CNC-200', risk: 'quality', classification: 'Fehler­historie · quantifiziert' },
+  { id: 't08', speaker: 'ai',    time: '08:45:11', text: 'Was sind die drei Schritte beim Lager­wechsel, die in der SOP fehlen?' },
+  { id: 't09', speaker: 'heinz', time: '08:45:32', text: 'Erstens: vor dem Ausbau das Spindel­gehäuse 20 Minuten warmlaufen lassen, sonst klemmt\'s. Zweitens: das alte Lager NIE mit dem Hammer raus­schlagen — Abzieher benutzen. Drittens: beim Einbau Loctite 243, nicht 242, sonst löst\'s sich bei Temperatur­schwankung.', topic: 'Lager­wechsel', machine: 'CNC-200', risk: 'maintenance', classification: 'SOP-Erweiterung · 3 Schritte' },
+  { id: 't10', speaker: 'ai',    time: '08:46:55', text: 'Letzter Punkt — wann muss ein Werkzeug wirklich gewechselt werden, jenseits der Standzeit­vorgabe?' },
+  { id: 't11', speaker: 'heinz', time: '08:47:12', text: 'Wenn die Späne ihre Farbe ändern — von silbrig zu bläulich — ist das Werkzeug zu 80 % verschlissen. Bei Edelstahl ein klares Signal.', topic: 'Werkzeug­verschleiß', machine: 'CNC-200', risk: 'quality', classification: 'Sensorisches Erfahrungs­wissen' },
+  { id: 't12', speaker: 'ai',    time: '08:47:40', text: 'Verstanden — extrahiere das als Regel und prüfe Verknüpfung zu SOP-CNC-200 §4.3 (Werkzeug­standzeit).' },
+]
+
+const RECOGNIZED_TOPICS = [
+  { label: 'Spindel-Akustik',     count: 4, tone: 'indigo'  as ImpactTone },
+  { label: 'Lager­wechsel',       count: 3, tone: 'amber'   as ImpactTone },
+  { label: 'Kühlmittel',          count: 3, tone: 'sky'     as ImpactTone },
+  { label: 'Werkzeug­verschleiß', count: 2, tone: 'violet'  as ImpactTone },
+  { label: 'Anfänger­fehler',     count: 2, tone: 'rose'    as ImpactTone },
+  { label: 'Loctite/Montage',     count: 1, tone: 'emerald' as ImpactTone },
+]
+
+const LIVE_CLASSIF_LOG: { time: string; label: string; conf: number; tone: ImpactTone }[] = [
+  { time: '08:47:42', label: 'Regel extrahiert · Späne-Farbe → Verschleiß 80 %',         conf: 94, tone: 'emerald' },
+  { time: '08:45:39', label: 'SOP-Erweiterung erkannt · 3 fehlende Schritte',             conf: 97, tone: 'sky'     },
+  { time: '08:44:53', label: 'Fehler­historie verknüpft · Lukas/März · 12 Ausschuss',     conf: 92, tone: 'amber'   },
+  { time: '08:44:09', label: 'Anfänger­fehler erkannt · Kühlmittel­druck < 4 bar',        conf: 96, tone: 'rose'    },
+  { time: '08:43:22', label: 'Heuristik erfasst · „Schreib­maschine"-Klang',               conf: 89, tone: 'violet'  },
+  { time: '08:42:28', label: 'Erfahrungs­wissen · akustische Lager-Diagnose',              conf: 91, tone: 'indigo'  },
+]
+
+const SUGGESTED_NEXT_Q = [
+  'Wie unter­scheidest du eine Lager-Vibration von einer Werkzeug-Vibration?',
+  'Welche Späne-Farben sind bei Aluminium kritisch — gilt deine Regel da auch?',
+  'Hast du eine Daumen­regel, wann Loctite 243 nicht reicht?',
+]
+
+const EXTRACTED_ITEMS: ExtractedItem[] = [
+  {
+    id: 'x01',
+    category: 'safety',
+    title: 'Kühlmittel­druck < 4 bar erzeugt Werkstück-Vibration',
+    body: 'Operator MUSS vor Programm­start den Kühlmittel­druck prüfen. Unter 4 bar entstehen Vibrationen, die zu Ausschuss führen. Fehler­historie belegt 4 Vorfälle / 6 Monate · 12 Teile Ausschuss im März.',
+    machine: 'CNC-200',
+    sources: ['t05', 't07'],
+    confidence: 96,
+    sopRef: 'SOP-CNC-200 §2.1',
+    status: 'critical',
+  },
+  {
+    id: 'x02',
+    category: 'rule',
+    title: 'Akustik-Regel · „Brummen vs. Klicken"',
+    body: 'Brummen wie Lkw → normal. Klicken wie Schreib­maschine → Spindel­lager­verschleiß. Frühindikator 1–3 Tage vor Ausfall.',
+    machine: 'CNC-200',
+    sources: ['t02', 't04'],
+    confidence: 89,
+    sopRef: 'SOP-Spindel-Inspektion §1.2',
+    status: 'new',
+  },
+  {
+    id: 'x03',
+    category: 'sop_extension',
+    title: 'Lager­wechsel · 3 fehlende Schritte',
+    body: '20 min Warmlauf vor Ausbau · Abzieher statt Hammer · Loctite 243 statt 242. Aktuelle SOP-CNC-200 v3.1 enthält keinen dieser Schritte.',
+    machine: 'CNC-200',
+    sources: ['t09'],
+    confidence: 97,
+    sopRef: 'SOP-CNC-200 §4.7 (neu)',
+    status: 'sop_extension',
+  },
+  {
+    id: 'x04',
+    category: 'beginner_mistake',
+    title: 'Hammer­schlag beim Lager-Ausbau',
+    body: 'Beobachtet bei 3/5 neuen Operatoren. Beschädigt Spindel­sitz, führt zu wiederholtem Lager­ausfall innerhalb 4 Wochen.',
+    machine: 'CNC-200',
+    sources: ['t09'],
+    confidence: 88,
+    sopRef: 'SOP-CNC-200 §4.7.2',
+    status: 'critical',
+  },
+  {
+    id: 'x05',
+    category: 'maintenance',
+    title: 'Spindel­gehäuse-Warmlauf vor Demontage',
+    body: 'Kalte Demontage verklemmt Toleranz­paarung. 20 min Warmlauf bei 1.200 U/min vor Lager-Ausbau erforderlich.',
+    machine: 'CNC-200',
+    sources: ['t09'],
+    confidence: 95,
+    sopRef: 'SOP-CNC-200 §4.7.1',
+    status: 'sop_extension',
+  },
+  {
+    id: 'x06',
+    category: 'rule',
+    title: 'Späne-Farbe als Werkzeug-Verschleiß­indikator',
+    body: 'Silbrig → ok. Bläulich → Werkzeug zu ~80 % verschlissen. Besonders relevant bei Edelstahl-Bearbeitung.',
+    machine: 'CNC-200',
+    sources: ['t11'],
+    confidence: 94,
+    sopRef: 'SOP-CNC-200 §4.3',
+    status: 'new',
+  },
+  {
+    id: 'x07',
+    category: 'best_practice',
+    title: 'Loctite 243 statt 242 bei Lager­montage',
+    body: 'Höhere Temperatur­toleranz. Verhindert Lockerung bei Lastwechsel und thermischen Spitzen.',
+    machine: 'CNC-200',
+    sources: ['t09'],
+    confidence: 93,
+    sopRef: 'SOP-CNC-200 §4.7.3',
+    status: 'sop_extension',
+  },
+  {
+    id: 'x08',
+    category: 'safety',
+    title: 'Akustische Früh­erkennung Spindel­lager­ausfall',
+    body: 'Tickendes Geräusch in den ersten 10 Minuten nach Schicht­start. Wenn nach 3 Tagen nicht abklingend → Lager­wechsel binnen 1 Woche.',
+    machine: 'CNC-200',
+    sources: ['t02'],
+    confidence: 90,
+    sopRef: 'SOP-Spindel-Inspektion §1.1',
+    status: 'new',
+  },
+]
+
+const KG_NODES: GraphNode[] = [
+  { id: 'heinz',         kind: 'expert',  label: 'Heinz Müller',           sub: 'Senior CNC · 38 J.', x: 380, y: 240, r: 30 },
+  { id: 'cnc200',        kind: 'machine', label: 'CNC-200',                sub: 'Bearbeitungs­zentrum', x: 380, y: 80,  r: 26 },
+  { id: 'sop_cnc',       kind: 'sop',     label: 'SOP-CNC-200 v3.2',       sub: 'Standard-Operation',   x: 610, y: 120, r: 22 },
+  { id: 'sop_spin',      kind: 'sop',     label: 'SOP-Spindel-Inspektion', sub: 'Wartungs-SOP',         x: 110, y: 240, r: 22 },
+  { id: 'risk_spindel',  kind: 'risk',    label: 'Spindel­lager­verschleiß', sub: 'Risiko · hoch',      x: 640, y: 270, r: 22 },
+  { id: 'risk_kuehl',    kind: 'risk',    label: 'Kühlmittel­druck-Fehler',  sub: 'Risiko · kritisch',  x: 180, y: 110, r: 22 },
+  { id: 'err_vibr',      kind: 'error',   label: 'Werkstück-Vibration',     sub: 'Fehler­bild',         x: 560, y: 400, r: 20 },
+  { id: 'err_break',     kind: 'error',   label: 'Werkzeug­bruch',          sub: 'Fehler­bild',         x: 510, y: 320, r: 18 },
+  { id: 'rule_3p',       kind: 'rule',    label: '3-Punkt-Kühl-Check',      sub: 'Erfahrungs­regel',    x: 380, y: 420, r: 20 },
+  { id: 'rule_freq',     kind: 'rule',    label: 'Frequenz-Hörprobe',       sub: 'Erfahrungs­regel',    x: 170, y: 400, r: 20 },
+  { id: 'rule_loctite',  kind: 'rule',    label: 'Loctite-243-Regel',       sub: 'Erfahrungs­regel',    x: 250, y: 320, r: 18 },
+  { id: 'rule_spaene',   kind: 'rule',    label: 'Späne-Farb-Regel',        sub: 'Erfahrungs­regel',    x: 640, y: 180, r: 18 },
+]
+
+const KG_EDGES: GraphEdge[] = [
+  { from: 'heinz',        to: 'cnc200',        kind: 'operates', label: '38 J.' },
+  { from: 'heinz',        to: 'sop_cnc',       kind: 'creates',  label: 'extends' },
+  { from: 'heinz',        to: 'rule_3p',       kind: 'creates' },
+  { from: 'heinz',        to: 'rule_freq',     kind: 'creates' },
+  { from: 'heinz',        to: 'rule_loctite',  kind: 'creates' },
+  { from: 'heinz',        to: 'rule_spaene',   kind: 'creates' },
+  { from: 'cnc200',       to: 'sop_cnc',       kind: 'mentions' },
+  { from: 'cnc200',       to: 'risk_spindel',  kind: 'mentions' },
+  { from: 'cnc200',       to: 'risk_kuehl',    kind: 'mentions' },
+  { from: 'cnc200',       to: 'err_vibr',      kind: 'mentions' },
+  { from: 'cnc200',       to: 'err_break',     kind: 'mentions' },
+  { from: 'sop_cnc',      to: 'rule_3p',       kind: 'extends',  label: '§2.1' },
+  { from: 'sop_cnc',      to: 'rule_spaene',   kind: 'extends',  label: '§4.3' },
+  { from: 'sop_spin',     to: 'risk_spindel',  kind: 'mitigates' },
+  { from: 'sop_spin',     to: 'rule_freq',     kind: 'extends',  label: '§1.2' },
+  { from: 'rule_3p',      to: 'risk_kuehl',    kind: 'prevents' },
+  { from: 'rule_freq',    to: 'risk_spindel',  kind: 'prevents' },
+  { from: 'rule_loctite', to: 'err_break',     kind: 'prevents' },
+  { from: 'risk_spindel', to: 'err_vibr',      kind: 'causes' },
+  { from: 'risk_kuehl',   to: 'err_vibr',      kind: 'causes' },
+]
+
+const IMPACT_KPIS: ImpactKpi[] = [
+  { label: 'Erfahrungs­regeln extrahiert', value: '142',  tone: 'indigo',  delta: '+38', deltaDir: 'up',   sub: 'aus 17 Experten-Interviews' },
+  { label: 'Kritische Risiken erkannt',    value: '12',   tone: 'rose',    delta: '+4',  deltaDir: 'up',   sub: 'davon 9 noch nicht in SOP'  },
+  { label: 'SOPs erweitert',               value: '4',    tone: 'sky',     delta: '+2',  deltaDir: 'up',   sub: 'CNC-200, WZG, Härterei'    },
+  { label: 'Wissens­verlust-Risiko',       value: '−82',  unit: '%',  tone: 'emerald', delta: 'seit Q1', deltaDir: 'down', sub: 'gegen­über Baseline 01/2026' },
+]
+
+const IMPACT_SECONDARY = [
+  { label: 'Anfänger­fehler dokumentiert', value: '47', tone: 'amber'  as ImpactTone },
+  { label: 'Wartungs-Wissen erfasst',      value: '63', tone: 'violet' as ImpactTone },
+  { label: 'Sicherheits-Hinweise',          value: '28', tone: 'rose'   as ImpactTone },
+  { label: 'Best Practices',                value: '54', tone: 'sky'    as ImpactTone },
+  { label: 'Maschinen-Kontext-Verknüpfungen', value: '218', tone: 'indigo'  as ImpactTone },
+  { label: 'Audit-fähige Quellen',         value: '142', tone: 'emerald' as ImpactTone },
+]
+
+// ----------- Tone tokens -------------------------------------------------
+
+const INTERV_RISK_TONE: Record<IntervRisk, { chip: string; label: string }> = {
+  safety:      { chip: 'text-rose-300    bg-rose-500/12    border-rose-400/30',    label: 'Sicherheit' },
+  quality:     { chip: 'text-amber-300   bg-amber-500/12   border-amber-400/30',   label: 'Qualität'   },
+  maintenance: { chip: 'text-sky-300     bg-sky-500/12     border-sky-400/30',     label: 'Wartung'    },
+}
+
+const EXTRACT_TONE: Record<ExtractCategory, { chip: string; ring: string; label: string; bar: string; icon: React.ReactNode }> = {
+  safety:           { chip: 'text-rose-300    bg-rose-500/12    border-rose-400/30',    ring: 'ring-rose-400/30',    label: 'Sicherheits­risiko',    bar: 'bg-rose-400',    icon: <ShieldAlert size={11} /> },
+  beginner_mistake: { chip: 'text-amber-300   bg-amber-500/12   border-amber-400/30',   ring: 'ring-amber-400/30',   label: 'Anfänger­fehler',       bar: 'bg-amber-400',   icon: <AlertTriangle size={11} /> },
+  sop_extension:    { chip: 'text-sky-300     bg-sky-500/12     border-sky-400/30',     ring: 'ring-sky-400/30',     label: 'SOP-Erweiterung',        bar: 'bg-sky-400',     icon: <FileCheck2 size={11} /> },
+  rule:             { chip: 'text-emerald-300 bg-emerald-500/12 border-emerald-400/30', ring: 'ring-emerald-400/30', label: 'Erfahrungs­regel',       bar: 'bg-emerald-400', icon: <Sparkles size={11} /> },
+  maintenance:      { chip: 'text-violet-300  bg-violet-500/12  border-violet-400/30',  ring: 'ring-violet-400/30',  label: 'Wartungs-Wissen',        bar: 'bg-violet-400',  icon: <Wrench size={11} /> },
+  best_practice:    { chip: 'text-indigo-300  bg-indigo-500/12  border-indigo-400/30',  ring: 'ring-indigo-400/30',  label: 'Best Practice',          bar: 'bg-indigo-400',  icon: <Award size={11} /> },
+}
+
+const KG_TONE: Record<GraphNodeKind, { stroke: string; fill: string; text: string; halo: string; label: string }> = {
+  expert:  { stroke: '#fbbf24', fill: 'rgba(251,191,36,0.18)',  text: '#fde68a', halo: 'rgba(251,191,36,0.35)',  label: 'Experte'  },
+  machine: { stroke: '#818cf8', fill: 'rgba(129,140,248,0.16)', text: '#c7d2fe', halo: 'rgba(129,140,248,0.32)', label: 'Maschine' },
+  sop:     { stroke: '#38bdf8', fill: 'rgba(56,189,248,0.14)',  text: '#bae6fd', halo: 'rgba(56,189,248,0.30)',  label: 'SOP'      },
+  risk:    { stroke: '#fb7185', fill: 'rgba(251,113,133,0.14)', text: '#fecdd3', halo: 'rgba(251,113,133,0.30)', label: 'Risiko'   },
+  error:   { stroke: '#f59e0b', fill: 'rgba(245,158,11,0.14)',  text: '#fde68a', halo: 'rgba(245,158,11,0.30)',  label: 'Fehler­bild' },
+  rule:    { stroke: '#34d399', fill: 'rgba(52,211,153,0.14)',  text: '#a7f3d0', halo: 'rgba(52,211,153,0.30)',  label: 'Regel'    },
+}
+
+const IMPACT_TONE: Record<ImpactTone, { text: string; chip: string; bar: string; bg: string; ring: string }> = {
+  indigo:  { text: 'text-indigo-200',  chip: 'text-indigo-300  bg-indigo-500/10  border-indigo-400/25',  bar: 'bg-indigo-400',  bg: 'from-indigo-500/[0.10]',  ring: 'ring-indigo-400/25'  },
+  emerald: { text: 'text-emerald-200', chip: 'text-emerald-300 bg-emerald-500/10 border-emerald-400/25', bar: 'bg-emerald-400', bg: 'from-emerald-500/[0.10]', ring: 'ring-emerald-400/25' },
+  amber:   { text: 'text-amber-200',   chip: 'text-amber-300   bg-amber-500/10   border-amber-400/25',   bar: 'bg-amber-400',   bg: 'from-amber-500/[0.10]',   ring: 'ring-amber-400/25'   },
+  rose:    { text: 'text-rose-200',    chip: 'text-rose-300    bg-rose-500/10    border-rose-400/25',    bar: 'bg-rose-400',    bg: 'from-rose-500/[0.10]',    ring: 'ring-rose-400/25'    },
+  sky:     { text: 'text-sky-200',     chip: 'text-sky-300     bg-sky-500/10     border-sky-400/25',     bar: 'bg-sky-400',     bg: 'from-sky-500/[0.10]',     ring: 'ring-sky-400/25'     },
+  violet:  { text: 'text-violet-200',  chip: 'text-violet-300  bg-violet-500/10  border-violet-400/25',  bar: 'bg-violet-400',  bg: 'from-violet-500/[0.10]',  ring: 'ring-violet-400/25'  },
+}
+
+// ----------- Main shell --------------------------------------------------
+
+function KnowledgeCapture() {
+  const [tab, setTab] = useState<IntervTab>('live')
+  return (
+    <div className="relative -mt-2">
+      <div className="relative rounded-3xl overflow-hidden border border-zinc-800/80 bg-zinc-950 text-zinc-100 kf-canvas-fade">
+        <div className="absolute inset-0 kf-ops-grid pointer-events-none opacity-60" />
+        <div className="kf-aurora bg-indigo-600/25"  style={{ top: -120, left: '6%',  width: 480, height: 480 }} />
+        <div className="kf-aurora bg-violet-600/20" style={{ top: 220,  right: '4%', width: 520, height: 520, animationDelay: '3.5s' }} />
+        <div className="kf-aurora bg-sky-600/20"     style={{ top: 720,  left: '38%', width: 460, height: 460, animationDelay: '6s' }} />
+
+        <div className="relative p-6 lg:p-10 space-y-8">
+          <CaptureHero />
+          <CaptureTabs tab={tab} onTab={setTab} />
+          {tab === 'live'    && <TabLiveInterview />}
+          {tab === 'extract' && <TabExtraction />}
+          {tab === 'graph'   && <TabKnowledgeGraph />}
+          {tab === 'impact'  && <TabBusinessImpact />}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CaptureHero() {
+  return (
+    <div className="relative">
+      <div className="flex flex-wrap items-center gap-2 text-[10.5px]">
+        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-400/25 text-emerald-300 font-medium">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-70 animate-ping" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+          </span>
+          Aufnahme aktiv · 08:47:42
+        </span>
+        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full border border-white/10 bg-white/[0.04] text-zinc-300">
+          <Mic2 size={11} /> Sitzung #042 · Heinz Müller × CNC-200
+        </span>
+        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full border border-violet-400/30 bg-violet-500/10 text-violet-200 font-medium">
+          <Brain size={11} /> AI Knowledge OS · v4.2
+        </span>
+        <span className="ml-auto inline-flex items-center gap-1.5 px-2 py-1 rounded-full border border-white/10 bg-white/[0.04] text-zinc-300">
+          <Database size={11} /> Wissens­basis · 142 Regeln · 17 Experten
+        </span>
+      </div>
+
+      <div className="mt-5 grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
+        <div className="lg:col-span-8">
+          <div className="text-[10px] uppercase tracking-[0.22em] text-violet-300 font-semibold">Wissens­aufnahme · AI Knowledge OS</div>
+          <h1 className="mt-1 text-3xl lg:text-[40px] font-semibold tracking-tight text-white leading-[1.05]">
+            Das Betriebssystem zur <span className="kf-grad-text">Extraktion impliziten</span>
+            <br className="hidden lg:block" /> Erfahrungs­wissens.
+          </h1>
+          <p className="mt-3 max-w-2xl text-[14px] text-zinc-400 leading-relaxed">
+            KnowFlow führt Experten-Interviews, klassifiziert Aussagen in Echtzeit und verwandelt
+            <span className="text-zinc-200"> stilles Know-how</span> in Regeln, SOP-Erweiterungen und audit-fähige Quellen — automatisch.
+          </p>
+        </div>
+        <div className="lg:col-span-4 flex flex-wrap items-center justify-start lg:justify-end gap-2">
+          <button className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-zinc-100 text-[12.5px] transition">
+            <Pause size={13} /> Pause
+          </button>
+          <button className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-rose-400/30 bg-rose-500/10 hover:bg-rose-500/15 text-rose-200 text-[12.5px] transition">
+            <CircleStop size={13} /> Aufnahme beenden
+          </button>
+          <button className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white text-zinc-900 hover:bg-zinc-100 text-[12.5px] font-medium transition kf-cta-glow">
+            <Save size={13} /> In Wissens­basis übernehmen
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CaptureTabs({ tab, onTab }: { tab: IntervTab; onTab: (t: IntervTab) => void }) {
+  const items: { id: IntervTab; label: string; sub: string; icon: React.ReactNode }[] = [
+    { id: 'live',    label: 'Live Interview',  sub: 'Transkript · Wellen­form · KI-Fragen', icon: <Waves size={14} />   },
+    { id: 'extract', label: 'KI-Extraktion',   sub: 'Regeln · Risiken · SOP-Erweiterungen',  icon: <Sparkles size={14} />  },
+    { id: 'graph',   label: 'Wissensgraph',    sub: 'Experten · Maschinen · SOPs · Risiken', icon: <Network size={14} />   },
+    { id: 'impact',  label: 'Business Impact', sub: '142 Regeln · 12 Risiken · −82 %',       icon: <TrendingUp size={14} /> },
+  ]
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 p-1 rounded-2xl border border-white/8 bg-white/[0.03] backdrop-blur-sm">
+      {items.map((it) => {
+        const active = tab === it.id
+        return (
+          <button
+            key={it.id}
+            onClick={() => onTab(it.id)}
+            className={`relative text-left rounded-xl px-3.5 py-3 transition border ${
+              active
+                ? 'border-white/15 bg-gradient-to-br from-white/[0.10] to-white/[0.02] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] kf-cta-glow'
+                : 'border-transparent hover:border-white/10 hover:bg-white/[0.04]'
+            }`}
+          >
+            <div className="flex items-center gap-2 text-[12.5px] font-medium text-zinc-100">
+              <span className={active ? 'text-violet-300' : 'text-zinc-400'}>{it.icon}</span>
+              {it.label}
+              {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+            </div>
+            <div className={`mt-1 text-[10.5px] ${active ? 'text-zinc-400' : 'text-zinc-500'}`}>{it.sub}</div>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+// ----------- Tab 1 · Live Interview --------------------------------------
+
+function TabLiveInterview() {
+  return (
+    <div className="space-y-6">
+      <OpsSectionHeader
+        eyebrow="Tab 1 · Live Interview"
+        title="Experten-Aufnahme · Heinz Müller × CNC-200"
+        right={
+          <div className="flex items-center gap-2 text-[11px] text-zinc-300">
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/[0.04] border border-white/10">
+              <Clock size={11} /> 05:31 Aufnahme­dauer
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/[0.04] border border-white/10">
+              <Volume2 size={11} /> 48 kHz · 24 bit
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-emerald-400/30 bg-emerald-500/10 text-emerald-200">
+              <Activity size={11} /> AI-Klassifikation live
+            </span>
+          </div>
+        }
+      />
+
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
+        <div className="xl:col-span-8 space-y-5">
+          <InterviewWaveform />
+          <InterviewTranscript />
+        </div>
+        <div className="xl:col-span-4">
+          <InterviewSidebar />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function InterviewWaveform() {
+  // 64 bars, pseudo-random heights, animated
+  const bars = useMemo(() => Array.from({ length: 64 }, (_, i) => {
+    const seed = (Math.sin(i * 1.7) + Math.sin(i * 0.43)) * 0.5 + 0.6
+    return 14 + Math.abs(seed) * 36 + (i % 7 === 0 ? 12 : 0)
+  }), [])
+  return (
+    <div className="relative rounded-2xl border border-white/8 bg-gradient-to-br from-zinc-900/70 to-zinc-950/70 backdrop-blur-sm p-4 overflow-hidden">
+      <div className="absolute inset-0 kf-scan pointer-events-none opacity-30" />
+      <div className="relative flex items-center justify-between text-[10.5px] uppercase tracking-[0.18em] text-zinc-400">
+        <span className="inline-flex items-center gap-1.5"><Waves size={11} className="text-violet-300" /> Audio-Wellen­form · Spur 01</span>
+        <span className="inline-flex items-center gap-1.5 text-emerald-300"><CircleDot size={9} className="animate-pulse" /> recording</span>
+      </div>
+      <div className="relative mt-3 h-24 flex items-center gap-[3px]">
+        {bars.map((h, i) => (
+          <div
+            key={i}
+            className="flex-1 rounded-sm bg-gradient-to-t from-violet-500/30 via-violet-400/70 to-fuchsia-300/90"
+            style={{
+              height: `${h}px`,
+              animation: 'kf-breath 2.4s ease-in-out infinite',
+              animationDelay: `${(i % 16) * 0.06}s`,
+              opacity: 0.55 + ((i * 13) % 100) / 220,
+            }}
+          />
+        ))}
+      </div>
+      <div className="relative mt-2 flex items-center justify-between text-[10px] text-zinc-500">
+        <span>00:00</span>
+        <span>02:45</span>
+        <span>05:31 / live</span>
+      </div>
+    </div>
+  )
+}
+
+function InterviewTranscript() {
+  return (
+    <div className="relative rounded-2xl border border-white/8 bg-gradient-to-br from-zinc-900/60 to-zinc-950/70 backdrop-blur-sm overflow-hidden">
+      <div className="flex items-center justify-between border-b border-white/8 px-4 py-3">
+        <div className="text-[10.5px] uppercase tracking-[0.18em] text-zinc-400 inline-flex items-center gap-1.5">
+          <ScrollText size={11} className="text-sky-300" /> Live-Transkript · 12 Beiträge · 2 Sprecher
+        </div>
+        <div className="flex items-center gap-2 text-[10.5px] text-zinc-400">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/12 border border-amber-400/30 text-amber-200"><User size={9} /> Heinz</span>
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-violet-500/12 border border-violet-400/30 text-violet-200"><Brain size={9} /> KI-Interviewer</span>
+        </div>
+      </div>
+      <div className="max-h-[460px] overflow-y-auto px-4 py-4 space-y-3">
+        {INTERVIEW_TURNS.map((t, i) => <InterviewTurnRow key={t.id} turn={t} delay={i * 30} />)}
+      </div>
+    </div>
+  )
+}
+
+function InterviewTurnRow({ turn, delay }: { turn: IntervTurn; delay: number }) {
+  const isAi = turn.speaker === 'ai'
+  return (
+    <div
+      className="kf-canvas-fade"
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <div className={`flex items-start gap-3 ${isAi ? '' : ''}`}>
+        <div className={`shrink-0 mt-0.5 h-7 w-7 rounded-lg flex items-center justify-center text-[10.5px] font-semibold ${
+          isAi
+            ? 'bg-violet-500/15 border border-violet-400/30 text-violet-200'
+            : 'bg-amber-500/15 border border-amber-400/30 text-amber-200'
+        }`}>
+          {isAi ? <Brain size={13} /> : 'HM'}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-1.5 text-[10.5px]">
+            <span className={`font-medium ${isAi ? 'text-violet-200' : 'text-amber-200'}`}>
+              {isAi ? 'KI-Interviewer' : 'Heinz Müller'}
+            </span>
+            <span className="text-zinc-500">·</span>
+            <span className="text-zinc-500 tabular-nums">{turn.time}</span>
+            {turn.topic && (
+              <span className="ml-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-white/10 bg-white/[0.04] text-zinc-300">
+                <CircleDot size={8} className="text-sky-300" /> {turn.topic}
+              </span>
+            )}
+            {turn.machine && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-indigo-400/25 bg-indigo-500/10 text-indigo-200">
+                <Factory size={9} /> {turn.machine}
+              </span>
+            )}
+            {turn.risk && (
+              <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border ${INTERV_RISK_TONE[turn.risk].chip}`}>
+                <ShieldAlert size={9} /> {INTERV_RISK_TONE[turn.risk].label}
+              </span>
+            )}
+          </div>
+          <p className={`mt-1 text-[13px] leading-relaxed ${isAi ? 'text-zinc-300 italic' : 'text-zinc-100'}`}>
+            {turn.text}
+          </p>
+          {turn.classification && (
+            <div className="mt-1.5 inline-flex items-center gap-1.5 text-[10.5px] px-2 py-0.5 rounded-md border border-emerald-400/25 bg-emerald-500/8 text-emerald-200">
+              <Sparkles size={10} /> {turn.classification}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function InterviewSidebar() {
+  return (
+    <div className="space-y-4">
+      {/* Speaker card */}
+      <div className="relative rounded-2xl border border-amber-400/25 bg-gradient-to-br from-amber-500/[0.08] to-zinc-950/40 p-4 overflow-hidden">
+        <div className="kf-aurora bg-amber-500/15" style={{ top: -40, right: -40, width: 180, height: 180 }} />
+        <div className="relative flex items-center gap-3">
+          <div className="h-11 w-11 rounded-xl bg-amber-500/25 border border-amber-400/40 flex items-center justify-center text-amber-100 font-semibold">HM</div>
+          <div>
+            <div className="text-[13px] font-semibold text-amber-50">Heinz Müller</div>
+            <div className="text-[11px] text-amber-200/80">Senior CNC-Operator · 38 Jahre</div>
+          </div>
+        </div>
+        <div className="relative mt-3 grid grid-cols-3 gap-2 text-[10.5px]">
+          <div className="rounded-lg bg-black/30 border border-white/8 px-2 py-1.5">
+            <div className="text-zinc-400">Renteneintritt</div>
+            <div className="text-amber-200 font-semibold">Sept 2026</div>
+          </div>
+          <div className="rounded-lg bg-black/30 border border-white/8 px-2 py-1.5">
+            <div className="text-zinc-400">Maschinen</div>
+            <div className="text-amber-200 font-semibold">CNC-200, WZG-S</div>
+          </div>
+          <div className="rounded-lg bg-black/30 border border-white/8 px-2 py-1.5">
+            <div className="text-zinc-400">Kritikalität</div>
+            <div className="text-rose-300 font-semibold">hoch</div>
+          </div>
+        </div>
+      </div>
+
+      {/* AI status */}
+      <div className="rounded-2xl border border-violet-400/25 bg-gradient-to-br from-violet-500/[0.08] to-zinc-950/40 p-4">
+        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-violet-300">
+          <Brain size={11} /> KI-Status · live
+        </div>
+        <div className="mt-2 text-[13px] text-zinc-100">
+          Klassifikation aktiv · 4 Themen erkannt · 7 Wissens-Snippets extrahiert
+        </div>
+        <div className="mt-3 space-y-2">
+          {[
+            { label: 'Themen-Erkennung', v: 92 },
+            { label: 'Risiko-Tagging',   v: 87 },
+            { label: 'Regel-Extraktion', v: 94 },
+          ].map((m) => (
+            <div key={m.label} className="text-[11px]">
+              <div className="flex items-center justify-between text-zinc-400">
+                <span>{m.label}</span>
+                <span className="tabular-nums text-zinc-200">{m.v} %</span>
+              </div>
+              <div className="mt-1 h-1 rounded-full bg-white/8 overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-violet-400 to-fuchsia-300" style={{ width: `${m.v}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Recognized topics */}
+      <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-4">
+        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-zinc-400">
+          <Target size={11} className="text-sky-300" /> Erkannte Themen
+        </div>
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          {RECOGNIZED_TOPICS.map((t) => {
+            const tone = IMPACT_TONE[t.tone]
+            return (
+              <span key={t.label} className={`inline-flex items-center gap-1 px-2 py-1 rounded-md border text-[11px] ${tone.chip}`}>
+                {t.label} <span className="opacity-70 tabular-nums">×{t.count}</span>
+              </span>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* AI suggested next question */}
+      <div className="rounded-2xl border border-sky-400/25 bg-gradient-to-br from-sky-500/[0.08] to-zinc-950/40 p-4">
+        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-sky-300">
+          <HelpCircle size={11} /> Nächste KI-Frage · vorgeschlagen
+        </div>
+        <div className="mt-2 text-[13px] text-zinc-100 leading-snug">
+          „{SUGGESTED_NEXT_Q[0]}"
+        </div>
+        <div className="mt-3 space-y-1.5">
+          {SUGGESTED_NEXT_Q.slice(1).map((q, i) => (
+            <div key={i} className="flex items-start gap-1.5 text-[11.5px] text-zinc-300">
+              <CornerDownRight size={11} className="mt-0.5 text-sky-300" />
+              <span>{q}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 flex items-center gap-2">
+          <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] bg-white text-zinc-900 hover:bg-zinc-100 font-medium kf-cta-glow">
+            <ArrowRight size={11} /> Frage stellen
+          </button>
+          <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200">
+            <RefreshCcw size={11} /> Alternative
+          </button>
+        </div>
+      </div>
+
+      {/* Live classification log */}
+      <div className="rounded-2xl border border-white/8 bg-gradient-to-br from-zinc-900/60 to-zinc-950/70 p-4">
+        <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-zinc-400">
+          <span className="inline-flex items-center gap-1.5"><Activity size={11} className="text-emerald-300" /> Klassifikations-Stream</span>
+          <span className="text-emerald-300 normal-case tracking-normal">live</span>
+        </div>
+        <div className="mt-2 space-y-1.5 max-h-44 overflow-y-auto pr-1">
+          {LIVE_CLASSIF_LOG.map((c, i) => {
+            const tone = IMPACT_TONE[c.tone]
+            return (
+              <div
+                key={i}
+                className="flex items-start gap-2 text-[11px] kf-canvas-fade"
+                style={{ animationDelay: `${i * 60}ms` }}
+              >
+                <span className="tabular-nums text-zinc-500">{c.time}</span>
+                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border ${tone.chip} shrink-0`}>
+                  <Sparkle size={9} /> {c.conf}
+                </span>
+                <span className="text-zinc-200">{c.label}</span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ----------- Tab 2 · KI-Extraktion ---------------------------------------
+
+function TabExtraction() {
+  const [filter, setFilter] = useState<ExtractCategory | 'all'>('all')
+  const filtered = filter === 'all' ? EXTRACTED_ITEMS : EXTRACTED_ITEMS.filter((x) => x.category === filter)
+  const counts: Record<ExtractCategory | 'all', number> = {
+    all:              EXTRACTED_ITEMS.length,
+    safety:           EXTRACTED_ITEMS.filter((x) => x.category === 'safety').length,
+    beginner_mistake: EXTRACTED_ITEMS.filter((x) => x.category === 'beginner_mistake').length,
+    sop_extension:    EXTRACTED_ITEMS.filter((x) => x.category === 'sop_extension').length,
+    rule:             EXTRACTED_ITEMS.filter((x) => x.category === 'rule').length,
+    maintenance:      EXTRACTED_ITEMS.filter((x) => x.category === 'maintenance').length,
+    best_practice:    EXTRACTED_ITEMS.filter((x) => x.category === 'best_practice').length,
+  }
+  const cats: { id: ExtractCategory | 'all'; label: string }[] = [
+    { id: 'all',              label: 'Alle' },
+    { id: 'safety',           label: 'Sicherheits­risiken' },
+    { id: 'beginner_mistake', label: 'Anfänger­fehler' },
+    { id: 'sop_extension',    label: 'SOP-Erweiterungen' },
+    { id: 'rule',             label: 'Erfahrungs­regeln' },
+    { id: 'maintenance',      label: 'Wartung' },
+    { id: 'best_practice',    label: 'Best Practices' },
+  ]
+  return (
+    <div className="space-y-6">
+      <OpsSectionHeader
+        eyebrow="Tab 2 · KI-Extraktion"
+        title="Implizites Wissen → strukturierte Regeln"
+        right={
+          <div className="flex items-center gap-2 text-[11px] text-zinc-300">
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/[0.04] border border-white/10">
+              <Sparkles size={11} className="text-violet-300" /> 8 Extraktionen · Sitzung #042
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-emerald-400/30 bg-emerald-500/10 text-emerald-200">
+              <BadgeCheck size={11} /> Ø Konfidenz 93 %
+            </span>
+          </div>
+        }
+      />
+
+      <div className="flex flex-wrap items-center gap-1.5">
+        {cats.map((c) => {
+          const active = filter === c.id
+          const c2 = counts[c.id]
+          return (
+            <button
+              key={c.id}
+              onClick={() => setFilter(c.id)}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11.5px] border transition ${
+                active
+                  ? 'border-white/20 bg-white/[0.08] text-white'
+                  : 'border-white/10 bg-white/[0.03] text-zinc-300 hover:bg-white/[0.06]'
+              }`}
+            >
+              {c.id !== 'all' && <span className={`inline-block h-1.5 w-1.5 rounded-full ${EXTRACT_TONE[c.id as ExtractCategory].bar}`} />}
+              {c.label}
+              <span className="text-zinc-500 tabular-nums">{c2}</span>
+            </button>
+          )
+        })}
+        <div className="ml-auto inline-flex items-center gap-1.5 text-[11px] text-zinc-400">
+          <Filter size={11} /> automatisch klassifiziert · GPT-Extractor v4.2
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
+        {filtered.map((x, i) => <ExtractCard key={x.id} item={x} delay={i * 60} />)}
+      </div>
+    </div>
+  )
+}
+
+function ExtractCard({ item, delay }: { item: ExtractedItem; delay: number }) {
+  const t = EXTRACT_TONE[item.category]
+  const isCritical = item.status === 'critical'
+  return (
+    <div
+      className={`group relative rounded-2xl border ${isCritical ? 'border-rose-400/30' : 'border-white/10'} bg-gradient-to-br from-zinc-900/70 to-zinc-950/70 backdrop-blur-sm p-4 kf-canvas-fade overflow-hidden`}
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      {isCritical && <div className="absolute top-0 left-0 h-[2px] w-full bg-gradient-to-r from-transparent via-rose-400/80 to-transparent" />}
+      <div className="flex items-start justify-between gap-2">
+        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[10.5px] ${t.chip}`}>
+          {t.icon} {t.label}
+        </span>
+        <div className="flex items-center gap-1.5 text-[10.5px]">
+          {item.status === 'sop_extension' && (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-sky-400/30 bg-sky-500/10 text-sky-200">
+              <FileCheck2 size={9} /> SOP-Erweiterung
+            </span>
+          )}
+          {isCritical && (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-rose-400/30 bg-rose-500/10 text-rose-200">
+              <ShieldAlert size={9} /> kritisch
+            </span>
+          )}
+        </div>
+      </div>
+      <h3 className="mt-2.5 text-[14px] font-semibold text-white tracking-tight leading-snug">{item.title}</h3>
+      <p className="mt-1.5 text-[12.5px] text-zinc-400 leading-relaxed">{item.body}</p>
+
+      <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[10.5px]">
+        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-indigo-400/25 bg-indigo-500/10 text-indigo-200">
+          <Factory size={9} /> {item.machine}
+        </span>
+        {item.sopRef && (
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-white/10 bg-white/[0.04] text-zinc-300">
+            <ScrollText size={9} /> {item.sopRef}
+          </span>
+        )}
+        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-white/10 bg-white/[0.04] text-zinc-300">
+          <Quote size={9} /> Quellen: {item.sources.length}
+        </span>
+      </div>
+
+      <div className="mt-3">
+        <div className="flex items-center justify-between text-[10.5px] text-zinc-400">
+          <span className="inline-flex items-center gap-1"><Sparkle size={9} className="text-emerald-300" /> Konfidenz</span>
+          <span className="tabular-nums text-zinc-200">{item.confidence} %</span>
+        </div>
+        <div className="mt-1 h-1 rounded-full bg-white/8 overflow-hidden">
+          <div className={`h-full ${t.bar} kf-bar-fill`} style={{ width: `${item.confidence}%`, animationDelay: `${delay}ms` }} />
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center gap-1.5 pt-3 border-t border-white/8">
+        <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] bg-white text-zinc-900 hover:bg-zinc-100 font-medium">
+          <ArrowRight size={11} /> In SOP übernehmen
+        </button>
+        <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200">
+          <Eye size={11} /> Quelle ansehen
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ----------- Tab 3 · Wissensgraph ----------------------------------------
+
+function TabKnowledgeGraph() {
+  const counts = useMemo(() => {
+    const c: Record<GraphNodeKind, number> = { expert: 0, machine: 0, sop: 0, risk: 0, error: 0, rule: 0 }
+    KG_NODES.forEach((n) => { c[n.kind]++ })
+    return c
+  }, [])
+  return (
+    <div className="space-y-6">
+      <OpsSectionHeader
+        eyebrow="Tab 3 · Wissensgraph"
+        title="Verknüpftes Experten-Wissen · Maschinen · SOPs · Risiken"
+        right={
+          <div className="flex items-center gap-2 text-[11px] text-zinc-300">
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/[0.04] border border-white/10">
+              <GitBranch size={11} /> {KG_NODES.length} Knoten · {KG_EDGES.length} Kanten
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-violet-400/30 bg-violet-500/10 text-violet-200">
+              <Spline size={11} /> Wissens­dichte 4.3×
+            </span>
+          </div>
+        }
+      />
+
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
+        <div className="xl:col-span-9">
+          <KnowledgeGraph />
+        </div>
+        <div className="xl:col-span-3 space-y-3">
+          {(Object.keys(counts) as GraphNodeKind[]).map((k) => {
+            const tone = KG_TONE[k]
+            return (
+              <div key={k} className="rounded-xl border border-white/8 bg-white/[0.03] p-3">
+                <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="inline-block h-2 w-2 rounded-full" style={{ background: tone.stroke }} />
+                    {tone.label}
+                  </span>
+                  <span className="tabular-nums text-zinc-200 font-semibold">{counts[k]}</span>
+                </div>
+              </div>
+            )
+          })}
+          <div className="rounded-xl border border-emerald-400/25 bg-emerald-500/[0.08] p-3">
+            <div className="text-[10.5px] uppercase tracking-[0.18em] text-emerald-300">Audit-Bereitschaft</div>
+            <div className="mt-1 text-[13px] text-emerald-100 font-semibold">jede Kante = Quelle</div>
+            <div className="mt-1 text-[11px] text-emerald-200/80">142 Quellen · 17 Experten · ISO 9001 konform</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 text-[10.5px] text-zinc-400">
+        <span className="uppercase tracking-[0.18em]">Legende</span>
+        {(['expert','machine','sop','risk','error','rule'] as GraphNodeKind[]).map((k) => {
+          const tone = KG_TONE[k]
+          return (
+            <span key={k} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/10 bg-white/[0.04]">
+              <span className="inline-block h-2 w-2 rounded-full" style={{ background: tone.stroke }} />
+              {tone.label}
+            </span>
+          )
+        })}
+        <span className="mx-2 text-zinc-600">|</span>
+        <span className="text-zinc-500">Kanten-Typen:</span>
+        {(['creates','operates','prevents','mentions','extends','mitigates','causes'] as GraphEdgeKind[]).map((e) => (
+          <span key={e} className="inline-flex items-center gap-1 text-zinc-400">{e}</span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function KnowledgeGraph() {
+  const W = 720
+  const H = 500
+  const nodeById = useMemo(() => {
+    const m: Record<string, GraphNode> = {}
+    KG_NODES.forEach((n) => { m[n.id] = n })
+    return m
+  }, [])
+  const edgeStyle = (k: GraphEdgeKind): { stroke: string; dash?: string } => {
+    switch (k) {
+      case 'creates':   return { stroke: 'rgba(251,191,36,0.55)' }
+      case 'operates':  return { stroke: 'rgba(251,191,36,0.7)' }
+      case 'prevents':  return { stroke: 'rgba(52,211,153,0.55)' }
+      case 'mentions':  return { stroke: 'rgba(129,140,248,0.45)', dash: '3 4' }
+      case 'extends':   return { stroke: 'rgba(56,189,248,0.55)' }
+      case 'mitigates': return { stroke: 'rgba(56,189,248,0.6)', dash: '6 4' }
+      case 'causes':    return { stroke: 'rgba(251,113,133,0.6)' }
+    }
+  }
+  return (
+    <div className="relative rounded-2xl border border-white/8 bg-gradient-to-br from-zinc-900/60 to-zinc-950/80 backdrop-blur-sm p-3 overflow-hidden">
+      <div className="absolute inset-0 kf-ops-grid opacity-50 pointer-events-none" />
+      <svg viewBox={`0 0 ${W} ${H}`} className="relative w-full h-[480px]">
+        <defs>
+          <radialGradient id="kg-glow-expert" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"  stopColor="rgba(251,191,36,0.55)" />
+            <stop offset="100%" stopColor="rgba(251,191,36,0)" />
+          </radialGradient>
+          <radialGradient id="kg-glow-machine" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"  stopColor="rgba(129,140,248,0.45)" />
+            <stop offset="100%" stopColor="rgba(129,140,248,0)" />
+          </radialGradient>
+          <marker id="kg-arrow" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="5" markerHeight="5" orient="auto">
+            <path d="M0,0 L8,4 L0,8 z" fill="rgba(255,255,255,0.45)" />
+          </marker>
+        </defs>
+
+        {/* Edges */}
+        <g>
+          {KG_EDGES.map((e, i) => {
+            const from = nodeById[e.from]
+            const to   = nodeById[e.to]
+            if (!from || !to) return null
+            const dx = to.x - from.x
+            const dy = to.y - from.y
+            const len = Math.hypot(dx, dy)
+            const ux = dx / len
+            const uy = dy / len
+            const fr = from.r ?? 22
+            const tr = to.r ?? 22
+            const x1 = from.x + ux * fr
+            const y1 = from.y + uy * fr
+            const x2 = to.x   - ux * (tr + 6)
+            const y2 = to.y   - uy * (tr + 6)
+            const mx = (x1 + x2) / 2
+            const my = (y1 + y2) / 2 - 6
+            const s = edgeStyle(e.kind)
+            return (
+              <g key={i} className="kf-canvas-fade" style={{ animationDelay: `${i * 35}ms` }}>
+                <line
+                  x1={x1} y1={y1} x2={x2} y2={y2}
+                  stroke={s.stroke}
+                  strokeWidth={1.4}
+                  strokeDasharray={s.dash}
+                  markerEnd="url(#kg-arrow)"
+                />
+                {e.label && (
+                  <text x={mx} y={my} fill="rgba(212,212,216,0.7)" fontSize={9} textAnchor="middle">
+                    {e.label}
+                  </text>
+                )}
+              </g>
+            )
+          })}
+        </g>
+
+        {/* Nodes */}
+        <g>
+          {KG_NODES.map((n, i) => {
+            const tone = KG_TONE[n.kind]
+            const r = n.r ?? 22
+            return (
+              <g key={n.id} className="kf-canvas-fade" style={{ animationDelay: `${300 + i * 40}ms` }}>
+                {(n.kind === 'expert' || n.kind === 'machine') && (
+                  <circle cx={n.x} cy={n.y} r={r + 16} fill={n.kind === 'expert' ? 'url(#kg-glow-expert)' : 'url(#kg-glow-machine)'} />
+                )}
+                <circle cx={n.x} cy={n.y} r={r} fill={tone.fill} stroke={tone.stroke} strokeWidth={1.3} />
+                {n.kind === 'expert' && (
+                  <text x={n.x} y={n.y + 4} textAnchor="middle" fontSize={11} fontWeight={600} fill={tone.text}>
+                    HM
+                  </text>
+                )}
+                {n.kind !== 'expert' && (
+                  <circle cx={n.x} cy={n.y} r={4} fill={tone.stroke} opacity={0.85} />
+                )}
+                <text
+                  x={n.x} y={n.y + r + 12}
+                  textAnchor="middle"
+                  fontSize={10.5}
+                  fontWeight={600}
+                  fill={tone.text}
+                >
+                  {n.label}
+                </text>
+                {n.sub && (
+                  <text
+                    x={n.x} y={n.y + r + 24}
+                    textAnchor="middle"
+                    fontSize={9}
+                    fill="rgba(161,161,170,0.85)"
+                  >
+                    {n.sub}
+                  </text>
+                )}
+              </g>
+            )
+          })}
+        </g>
+      </svg>
+    </div>
+  )
+}
+
+// ----------- Tab 4 · Business Impact -------------------------------------
+
+function TabBusinessImpact() {
+  return (
+    <div className="space-y-6">
+      <OpsSectionHeader
+        eyebrow="Tab 4 · Business Impact"
+        title="Wissens­extraktion in messbarem Geschäfts­wert"
+        right={
+          <div className="flex items-center gap-2 text-[11px] text-zinc-300">
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/[0.04] border border-white/10">
+              <Calendar size={11} /> Snapshot · 18.05.2026
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-emerald-400/30 bg-emerald-500/10 text-emerald-200">
+              <ShieldCheck size={11} /> audit-ready
+            </span>
+          </div>
+        }
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+        {IMPACT_KPIS.map((k, i) => <ImpactKpiCard key={k.label} kpi={k} delay={i * 80} />)}
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
+        <div className="xl:col-span-7">
+          <BeforeAfterPanel />
+        </div>
+        <div className="xl:col-span-5">
+          <ImpactBreakdown />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+        {IMPACT_SECONDARY.map((s, i) => {
+          const tone = IMPACT_TONE[s.tone]
+          return (
+            <div
+              key={s.label}
+              className={`relative rounded-xl border border-white/8 bg-gradient-to-br ${tone.bg} to-zinc-950/40 p-3 kf-canvas-fade overflow-hidden`}
+              style={{ animationDelay: `${i * 60}ms` }}
+            >
+              <div className="text-[10.5px] text-zinc-400">{s.label}</div>
+              <div className={`mt-1.5 text-2xl font-semibold ${tone.text} tabular-nums tracking-tight`}>{s.value}</div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* CTA strip */}
+      <div className="rounded-2xl border border-white/8 bg-gradient-to-br from-violet-500/[0.10] via-zinc-900/40 to-indigo-500/[0.10] p-5 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="text-[10.5px] uppercase tracking-[0.18em] text-violet-300">Nächster Schritt</div>
+          <div className="mt-1 text-[15px] text-white font-semibold">17 Experten-Interviews bis Q3 · Wissens­verlust-Risiko auf 0 reduzieren</div>
+          <div className="mt-1 text-[12px] text-zinc-400">Auto-Scheduling, Skript-Generation und Klassifikation laufen bereits.</div>
+        </div>
+        <div className="flex items-center gap-2">
+          <button className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-zinc-100 text-[12.5px] transition">
+            <Download size={13} /> Impact-Report · PDF
+          </button>
+          <button className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white text-zinc-900 hover:bg-zinc-100 text-[12.5px] font-medium transition kf-cta-glow">
+            <PlayCircle size={13} /> Nächstes Interview starten
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ImpactKpiCard({ kpi, delay }: { kpi: ImpactKpi; delay: number }) {
+  const tone = IMPACT_TONE[kpi.tone]
+  const isUp = kpi.deltaDir === 'up'
+  return (
+    <div
+      className={`relative rounded-2xl border border-white/8 bg-gradient-to-br ${tone.bg} to-zinc-950/40 p-4 kf-canvas-fade overflow-hidden`}
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <div className={`absolute top-0 left-0 h-[2px] w-full ${tone.bar} opacity-70`} />
+      <div className="text-[10.5px] uppercase tracking-[0.18em] text-zinc-400">{kpi.label}</div>
+      <div className="mt-2 flex items-end gap-1.5">
+        <div className={`text-[34px] leading-none font-semibold ${tone.text} tabular-nums tracking-tight`}>{kpi.value}</div>
+        {kpi.unit && <div className={`text-[14px] ${tone.text} pb-1`}>{kpi.unit}</div>}
+      </div>
+      {kpi.delta && (
+        <div className={`mt-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[10.5px] ${tone.chip}`}>
+          {isUp ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
+          {kpi.delta}
+        </div>
+      )}
+      {kpi.sub && <div className="mt-2 text-[11px] text-zinc-400">{kpi.sub}</div>}
+    </div>
+  )
+}
+
+function BeforeAfterPanel() {
+  const rows = [
+    { label: 'Wissens­verlust pro Renten­abgang', before: '∼ 38 Jahre Erfahrung verloren', after: '142 Regeln + Audit-Trail erhalten', tone: 'emerald' as ImpactTone },
+    { label: 'SOP-Aktualität',                    before: 'manuelle Reviews jährlich',     after: 'KI-Vorschlag bei jedem Interview', tone: 'sky'     as ImpactTone },
+    { label: 'Anfänger­fehler-Rate (CNC-200)',    before: '4 Vorfälle / 6 Monate',          after: '0 Vorfälle seit Live-Warnung',     tone: 'rose'    as ImpactTone },
+    { label: 'Audit-Quellen pro Regel',           before: '0–1 (mündlich)',                 after: '3–7 (Transkript + Maschinen­log)', tone: 'indigo'  as ImpactTone },
+  ]
+  return (
+    <div className="relative rounded-2xl border border-white/8 bg-gradient-to-br from-zinc-900/60 to-zinc-950/80 p-5 overflow-hidden">
+      <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-zinc-400">
+        <span className="inline-flex items-center gap-1.5"><PercentSquare size={11} className="text-emerald-300" /> Vorher / Nachher</span>
+        <span className="text-zinc-500 normal-case tracking-normal">Baseline Q1 2026 → heute</span>
+      </div>
+      <div className="mt-4 space-y-3">
+        {rows.map((r, i) => {
+          const tone = IMPACT_TONE[r.tone]
+          return (
+            <div
+              key={r.label}
+              className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center kf-canvas-fade"
+              style={{ animationDelay: `${i * 80}ms` }}
+            >
+              <div className="md:col-span-4 text-[12px] text-zinc-300">{r.label}</div>
+              <div className="md:col-span-4 text-[12px] text-zinc-500 flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-white/10 bg-white/[0.04] text-zinc-400 text-[10.5px]">vorher</span>
+                <span className="line-through decoration-rose-400/50">{r.before}</span>
+              </div>
+              <div className={`md:col-span-4 text-[12px] flex items-center gap-2 ${tone.text}`}>
+                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[10.5px] ${tone.chip}`}>jetzt</span>
+                <span className="font-medium">{r.after}</span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function ImpactBreakdown() {
+  const bars = [
+    { label: 'Erfahrungs­regeln',     v: 142, max: 160, tone: 'indigo'  as ImpactTone },
+    { label: 'SOP-Erweiterungen',     v: 38,  max: 60,  tone: 'sky'     as ImpactTone },
+    { label: 'Sicherheits-Risiken',   v: 12,  max: 20,  tone: 'rose'    as ImpactTone },
+    { label: 'Anfänger­fehler',        v: 47,  max: 70,  tone: 'amber'   as ImpactTone },
+    { label: 'Best Practices',         v: 54,  max: 80,  tone: 'emerald' as ImpactTone },
+    { label: 'Wartungs-Wissen',        v: 63,  max: 90,  tone: 'violet'  as ImpactTone },
+  ]
+  return (
+    <div className="relative rounded-2xl border border-white/8 bg-gradient-to-br from-zinc-900/60 to-zinc-950/80 p-5">
+      <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-zinc-400">
+        <span className="inline-flex items-center gap-1.5"><BarChart3 size={11} className="text-indigo-300" /> Wissens-Inventar · nach Kategorie</span>
+      </div>
+      <div className="mt-4 space-y-2.5">
+        {bars.map((b, i) => {
+          const tone = IMPACT_TONE[b.tone]
+          const pct = Math.round((b.v / b.max) * 100)
+          return (
+            <div key={b.label} className="kf-canvas-fade" style={{ animationDelay: `${i * 60}ms` }}>
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-zinc-300">{b.label}</span>
+                <span className="tabular-nums text-zinc-200">
+                  {b.v} <span className="text-zinc-500">/ {b.max}</span>
+                </span>
+              </div>
+              <div className="mt-1 h-1.5 rounded-full bg-white/8 overflow-hidden">
+                <div className={`h-full ${tone.bar} kf-bar-fill`} style={{ width: `${pct}%`, animationDelay: `${i * 60}ms` }} />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      <div className="mt-4 pt-4 border-t border-white/8 flex items-center justify-between text-[11px] text-zinc-400">
+        <span className="inline-flex items-center gap-1.5"><Database size={11} className="text-violet-300" /> Wissens­basis-Größe</span>
+        <span className="text-zinc-200 tabular-nums font-semibold">356 strukturierte Einträge</span>
+      </div>
+    </div>
+  )
+}
+
 // ---------- App Shell -------------------------------------------------------
 
 export default function App() {
@@ -4853,13 +7164,10 @@ export default function App() {
             setSection={setSection}
           />
         )
+      case 'operations':
+        return <Operations />
       case 'capture':
-        return (
-          <Capture
-            entries={entries}
-            onSave={(e) => setEntries((arr) => [e, ...arr])}
-          />
-        )
+        return <KnowledgeCapture />
       case 'interview':
         return (
           <Interview onCreateEntry={(e) => setEntries((arr) => [e, ...arr])} />
