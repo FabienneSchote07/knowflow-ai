@@ -1,0 +1,264 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ===========================================================
+   KnowFlow AI – Custom Animations & Effects
+   =========================================================== */
+
+@keyframes slide-up-fade {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0.35), 0 0 40px -4px rgba(139,92,246,0.25); }
+  50%      { box-shadow: 0 0 0 6px rgba(99,102,241,0.08), 0 0 60px -2px rgba(139,92,246,0.45); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes border-spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes blob-float {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  33%      { transform: translate(20px,-15px) scale(1.05); }
+  66%      { transform: translate(-15px,10px) scale(0.97); }
+}
+
+@keyframes dot-bounce {
+  0%, 80%, 100% { transform: scale(0); opacity: .3; }
+  40%           { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse-ring {
+  0%   { transform: scale(0.85); opacity: .8; }
+  80%  { transform: scale(1.6);  opacity: 0; }
+  100% { transform: scale(1.6);  opacity: 0; }
+}
+
+@keyframes scan-line {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(120%); opacity: 0; }
+}
+
+/* Utility classes */
+.kf-fade-in {
+  animation: slide-up-fade 0.5s ease-out both;
+}
+
+.kf-shimmer {
+  background: linear-gradient(90deg,
+    rgba(99,102,241,0) 0%,
+    rgba(99,102,241,0.15) 50%,
+    rgba(99,102,241,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+.kf-glow-pulse {
+  animation: glow-pulse 2.6s ease-in-out infinite;
+}
+
+.kf-blob {
+  animation: blob-float 9s ease-in-out infinite;
+  filter: blur(48px);
+  opacity: 0.55;
+}
+
+.kf-dot {
+  animation: dot-bounce 1.2s ease-in-out infinite both;
+}
+.kf-dot:nth-child(2) { animation-delay: 0.15s; }
+.kf-dot:nth-child(3) { animation-delay: 0.30s; }
+
+.kf-ring::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 2px solid rgba(99,102,241,.45);
+  animation: pulse-ring 1.8s ease-out infinite;
+  pointer-events: none;
+}
+
+/* Animated gradient border (focus / processing state) */
+.kf-grad-border {
+  position: relative;
+  background: white;
+  border-radius: 1rem;
+  isolation: isolate;
+}
+.kf-grad-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899,#6366f1);
+  background-size: 300% 300%;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  animation: shimmer 4s linear infinite;
+  pointer-events: none;
+}
+
+/* Scan-line overlay used during processing */
+.kf-scan {
+  position: absolute;
+  left: 0; right: 0;
+  height: 60%;
+  background: linear-gradient(180deg,
+    rgba(99,102,241,0) 0%,
+    rgba(99,102,241,0.12) 50%,
+    rgba(99,102,241,0) 100%);
+  animation: scan-line 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Stagger helper — applied via inline style for index, simplifies the JSX */
+.kf-stagger { animation: slide-up-fade 0.55s ease-out both; }
+
+/* ===========================================================
+   Landing Page – extra animations & helpers
+   =========================================================== */
+
+@keyframes grad-sweep {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes aurora-drift {
+  0%, 100% { transform: translate3d(0,0,0) scale(1); }
+  50%      { transform: translate3d(40px,-30px,0) scale(1.08); }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes flow-pulse {
+  0%, 100% { opacity: .4; transform: scaleX(1); }
+  50%      { opacity: 1;  transform: scaleX(1.02); }
+}
+
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+/* Animated gradient headline */
+.kf-grad-text {
+  background: linear-gradient(120deg,
+    #ffffff 0%,
+    #c7d2fe 25%,
+    #a5b4fc 45%,
+    #f0abfc 65%,
+    #ffffff 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: grad-sweep 8s ease-in-out infinite;
+}
+
+/* Aurora orb used in dark hero */
+.kf-aurora {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.55;
+  animation: aurora-drift 12s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Marquee for logo/trust strip */
+.kf-marquee-track {
+  animation: marquee 35s linear infinite;
+  width: max-content;
+}
+
+/* Subtle floating for hero mock */
+.kf-float-soft { animation: float-soft 6s ease-in-out infinite; }
+
+/* Flow connector line */
+.kf-flow-line {
+  background: linear-gradient(90deg,
+    rgba(99,102,241,0) 0%,
+    rgba(139,92,246,0.7) 50%,
+    rgba(99,102,241,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+/* Grid background for dark sections */
+.kf-grid-bg {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: -1px -1px;
+}
+
+/* Radial mask for hero grid fade */
+.kf-radial-mask {
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 35%, transparent 80%);
+          mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 35%, transparent 80%);
+}
+
+/* Browser frame top bar */
+.kf-browser-bar {
+  background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
+}
+
+/* Premium card hover lift */
+.kf-lift {
+  transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s ease;
+}
+.kf-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px -18px rgba(99,102,241,0.45);
+}
+
+/* Glass card on dark */
+.kf-glass-dark {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+}
+
+/* Inset highlight ring for premium cards */
+.kf-inset-ring {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 1px 0 rgba(0,0,0,0.2);
+}
