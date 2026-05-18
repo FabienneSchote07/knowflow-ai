@@ -101,69 +101,74 @@ function Nav({ onEnterApp }: { onEnterApp: () => void }) {
 function Hero({ onEnterApp }: { onEnterApp: () => void }) {
   return (
     <section id="top" className="relative overflow-hidden pt-16 pb-24 lg:pt-24 lg:pb-32">
-      {/* Aurora glows */}
-      <div className="kf-aurora bg-indigo-600/40" style={{ top: -120, left: '12%', width: 480, height: 480 }} />
-      <div className="kf-aurora bg-fuchsia-600/30" style={{ top: 60, right: '8%', width: 520, height: 520, animationDelay: '2s' }} />
-      <div className="kf-aurora bg-violet-600/30" style={{ top: 280, left: '40%', width: 420, height: 420, animationDelay: '4s' }} />
+      {/* Aurora glows — reduziert auf 2 (Operations-Sobriety statt SaaS-Marketing-Vibe) */}
+      <div className="kf-aurora bg-indigo-700/30" style={{ top: -140, left: '14%', width: 460, height: 460 }} />
+      <div className="kf-aurora bg-rose-700/20" style={{ top: 80, right: '10%', width: 480, height: 480, animationDelay: '2s' }} />
 
       {/* Grid bg with radial mask */}
       <div className="absolute inset-0 kf-grid-bg kf-radial-mask opacity-60 pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
-        {/* Eyebrow pill */}
+        {/* Eyebrow — Palantir-Pattern: kein Pill, kein Chevron. Proof-Anchor in Tracking-Wide-Uppercase. */}
         <div className="flex justify-center">
-          <a href="#produkt" className="group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] transition text-xs text-zinc-200">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            </span>
-            Vertical AI für den industriellen Mittelstand
-            <ChevronRight size={12} className="opacity-60 group-hover:translate-x-0.5 transition" />
+          <a
+            href="#produkt"
+            className="inline-flex items-center gap-3 text-[10.5px] tracking-[0.22em] uppercase text-zinc-500 hover:text-zinc-300 transition"
+          >
+            <span className="text-zinc-600">Industrial Operations Risk Software</span>
+            <span className="h-[3px] w-[3px] rounded-full bg-zinc-700" />
+            <span>Pilot Werk Mainz-Bischofsheim</span>
+            <span className="h-[3px] w-[3px] rounded-full bg-zinc-700" />
+            <span>CNC-200-Linie · 14 Senior-Operatoren</span>
           </a>
         </div>
 
-        {/* Headline */}
-        <h1 className="mt-7 text-center font-semibold tracking-[-0.03em] text-[44px] leading-[1.05] sm:text-6xl lg:text-[80px] lg:leading-[1.02]">
-          <span className="kf-grad-text">Bewahre das Wissen</span>
+        {/* Headline — Demographics → Konsequenz mit Anlagen-Vokabular und SOP-Verdikt. */}
+        <h1 className="mt-9 text-center font-semibold tracking-[-0.03em] text-[40px] leading-[1.06] sm:text-5xl lg:text-[64px] lg:leading-[1.04]">
+          <span className="text-white">34&nbsp;% Ihrer Senior-Operatoren</span>
           <br />
-          <span className="text-white">deiner Experten.</span>
+          <span className="text-white">gehen bis 2030 in Rente.</span>
           <br />
-          <span className="text-zinc-500">Bevor es geht.</span>
+          <span className="text-rose-300/90">Mit ihnen 30 Jahre Anlagen-Know-how.</span>{' '}
+          <span className="text-rose-300">Undokumentiert.</span>
         </h1>
 
-        {/* Sub */}
-        <p className="mt-7 max-w-2xl mx-auto text-center text-[17px] lg:text-lg leading-relaxed text-zinc-400">
-          KnowFlow AI ist der KI-Copilot für Produktion, HR und Operations.
-          Wir verwandeln implizites Experten­wissen in strukturierte SOPs, Onboarding-Pfade
-          und einen Operations-Copilot – bevor dein bestes Wissen in den Ruhestand geht.
+        {/* Sub — kürzer, operativer, mit Ausschuss-Quote. */}
+        <p className="mt-7 max-w-2xl mx-auto text-center text-[16px] lg:text-[17px] leading-relaxed text-zinc-400">
+          Jeder Renten­eintritt kostet Ihre Linie 14&nbsp;Monate Einarbeitung, 380.000&nbsp;€ implizites Anlagen-Wissen und eine höhere Ausschuss­quote pro Schicht.
+          <br className="hidden sm:block" />
+          <span className="text-zinc-200">KnowFlow extrahiert es — als auditierte Erfahrungs­regeln in MES, SOP und QM, vor dem Abgang.</span>
         </p>
 
-        {/* CTAs */}
+        {/* CTAs — Audit (Risk-Frame) primary, Architektur-Call (Enterprise-Vocab) sekundär. */}
         <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
           <button
             onClick={onEnterApp}
             className="group inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-zinc-900 font-medium shadow-[0_1px_0_rgba(255,255,255,0.5)_inset] hover:shadow-[0_0_0_4px_rgba(255,255,255,0.08)] transition"
           >
-            Live-Demo starten
+            Wissens­verlust-Audit anfordern
             <ArrowRight size={16} className="group-hover:translate-x-0.5 transition" />
           </button>
           <button
             onClick={onEnterApp}
             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-white font-medium transition"
           >
-            <Play size={14} /> Pilotprojekt anfragen
+            <Play size={14} /> Architektur-Call · 30 Min · Solution Architect
           </button>
         </div>
 
-        {/* Trust row */}
-        <div className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12px] text-zinc-500">
-          <TrustChip icon={<ShieldCheck size={12} />} label="ISO 27001 ready" />
+        {/* KPI strip */}
+        <HeroKpiStrip />
+
+        {/* Trust row — Pilot-Werk wandert ins Eyebrow. Hier: Architektur · Compliance · Hosting. */}
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11.5px] text-zinc-500">
+          <TrustChip icon={<Layers size={12} />} label="Operations-Schicht über MES, SAP-QM und SOP-System" />
           <span className="text-zinc-700">•</span>
-          <TrustChip icon={<Lock size={12} />} label="DSGVO-konform" />
+          <TrustChip icon={<FileText size={12} />} label="Audit-Trail je Erfahrungs­regel · ISO 9001 §7.1.6" />
           <span className="text-zinc-700">•</span>
-          <TrustChip icon={<Globe size={12} />} label="Hosted in EU" />
+          <TrustChip icon={<ShieldCheck size={12} />} label="ISO 27001 · BSI C5 · DSGVO Art. 32" />
           <span className="text-zinc-700">•</span>
-          <TrustChip icon={<Award size={12} />} label="Made in Germany" />
+          <TrustChip icon={<Globe size={12} />} label="On-Prem oder EU-Cloud · DE-Hosting" />
         </div>
 
         {/* Dashboard preview */}
@@ -172,6 +177,48 @@ function Hero({ onEnterApp }: { onEnterApp: () => void }) {
         </div>
       </div>
     </section>
+  )
+}
+
+/* ----------------------------- HERO KPI STRIP ----------------------------- */
+
+function HeroKpiStrip() {
+  // 3 KPIs: €-Anker · Operations-Anker · Audit-Anker. Industrial Vocabulary statt KM-Speak.
+  const kpis: { value: string; unit?: string; label: string; tone: 'rose' | 'amber' | 'indigo' }[] = [
+    { value: '2,4', unit: 'Mio €', label: 'Anlagen-Wissens­verlust · 14 Renten­eintritte · 36 Mo. · Werk Mainz', tone: 'rose'   },
+    { value: '47 → 11',             label: 'Einarbeitungs­tage · CNC-200-Linie · vor / nach 1. Pilot-Quartal',    tone: 'amber'  },
+    { value: '1.142',               label: 'auditierte Erfahrungs­regeln · ISO 9001 §7.1.6 · TÜV-rückverfolgbar',  tone: 'indigo' },
+  ]
+  const tone: Record<typeof kpis[number]['tone'], { val: string; chip: string; bar: string }> = {
+    rose:    { val: 'text-rose-200',   chip: 'border-rose-400/30   bg-rose-500/[0.07]',   bar: 'bg-rose-400/70'   },
+    amber:   { val: 'text-amber-200',  chip: 'border-amber-400/30  bg-amber-500/[0.07]',  bar: 'bg-amber-400/70'  },
+    indigo:  { val: 'text-indigo-200', chip: 'border-indigo-400/30 bg-indigo-500/[0.07]', bar: 'bg-indigo-400/70' },
+  }
+  return (
+    <div className="mt-12 max-w-4xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {kpis.map((k, i) => {
+          const t = tone[k.tone]
+          return (
+            <div
+              key={k.label}
+              className={`relative rounded-xl border ${t.chip} backdrop-blur-sm p-4 overflow-hidden kf-stagger`}
+              style={{ animationDelay: `${i * 70}ms` }}
+            >
+              <div className={`absolute top-0 left-0 h-[2px] w-full ${t.bar}`} />
+              <div className="flex items-baseline gap-1.5">
+                <div className={`text-[30px] leading-none font-semibold tabular-nums tracking-tight ${t.val}`}>{k.value}</div>
+                {k.unit && <div className={`text-[15px] ${t.val} opacity-80`}>{k.unit}</div>}
+              </div>
+              <div className="mt-2.5 text-[11.5px] text-zinc-400 leading-snug">{k.label}</div>
+            </div>
+          )
+        })}
+      </div>
+      <div className="mt-3 text-center text-[10.5px] text-zinc-500">
+        Quelle: KnowFlow-Pilot · Werk Mainz-Bischofsheim · 14 Senior-Operatoren · CNC-200-Familie · 36 Monate
+      </div>
+    </div>
   )
 }
 
@@ -192,31 +239,31 @@ function DashboardMock() {
       {/* Outer glow */}
       <div className="absolute -inset-6 bg-gradient-to-tr from-indigo-500/30 via-violet-500/30 to-fuchsia-500/30 blur-3xl rounded-[2rem] opacity-60" />
       <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-[0_30px_120px_-20px_rgba(99,102,241,0.45)]">
-        <BrowserBar url="app.knowflow.ai/dashboard" />
+        <BrowserBar url="knowflow.werk-mainz.lokal/ops-cockpit" />
         {/* light app body */}
         <div className="bg-zinc-50 text-zinc-900 p-5 sm:p-7">
           {/* Top row: title + kpi pill */}
           <div className="flex items-start justify-between mb-5">
             <div>
-              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-medium">Operations Cockpit</div>
-              <div className="mt-1 text-xl font-semibold tracking-tight">Wissens-Risiko Dashboard</div>
+              <div className="text-[11px] uppercase tracking-wider text-zinc-500 font-medium">Operations Cockpit · Werk Mainz-Bischofsheim · Linie&nbsp;3</div>
+              <div className="mt-1 text-xl font-semibold tracking-tight">Anlagen-Wissens­risiko · Live-Snapshot</div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100">
-                <Sparkles size={11} /> KI aktiv
+              <span className="inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-md bg-zinc-100 text-zinc-700 border border-zinc-200">
+                <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" /> MES-Sync · live
               </span>
               <span className="inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Live
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> 18.05.2026 · 09:42
               </span>
             </div>
           </div>
 
           {/* KPI grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <MockKpi tone="rose" label="Kritische Lücken" value="7" delta="+2" up={false} />
-            <MockKpi tone="amber" label="Experten vor Rente" value="3" delta="2026" up={false} />
-            <MockKpi tone="emerald" label="Sicherungsquote" value="68%" delta="+14%" up />
-            <MockKpi tone="indigo" label="Onboarding-Zeit" value="-37%" delta="vs Q1" up />
+            <MockKpi tone="rose"    label="Senior-Abgänge bis 2027" value="3"    delta="38 J. Ø" up={false} />
+            <MockKpi tone="amber"   label="Maschinen ohne Backup"   value="7"    delta="kritisch" up={false} />
+            <MockKpi tone="emerald" label="Anfänger­fehler · CNC-200" value="−47%" delta="6 Mon. Pilot" up />
+            <MockKpi tone="indigo"  label="Time-to-Productivity"     value="11 T." delta="vs. 47 T." up />
           </div>
 
           {/* Risk + Activity row */}
@@ -226,14 +273,14 @@ function DashboardMock() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[12px] font-semibold">
                   <AlertOctagon size={14} className="text-rose-500" />
-                  Kritisches Wissensrisiko
+                  Kritisches Erfahrungs­wissen vor Renten­eintritt
                 </div>
-                <span className="text-[10px] text-zinc-500">3 Experten</span>
+                <span className="text-[10px] text-zinc-500">3 Senior-Operatoren</span>
               </div>
               <div className="mt-3 space-y-2.5">
-                <ExpertRow name="Heinz Müller" role="CNC-Programmierer · 28 J." cover={42} risk="kritisch" months="4 Mon." />
-                <ExpertRow name="Petra Schäfer" role="QM-Auditorin · 22 J." cover={64} risk="hoch" months="13 Mon." />
-                <ExpertRow name="Jürgen Bachmann" role="Schweißmeister · 19 J." cover={81} risk="mittel" months="22 Mon." />
+                <ExpertRow name="Heinz Müller"    role="Senior CNC · CNC-200 · 38 J."        cover={0}  risk="kritisch" months="4 Mon." />
+                <ExpertRow name="Petra Schäfer"   role="QM-Auditorin · ISO 9001 · 22 J."     cover={64} risk="hoch"     months="13 Mon." />
+                <ExpertRow name="Jürgen Bachmann" role="Schweiß­meister · Härterei · 19 J."  cover={81} risk="mittel"   months="22 Mon." />
               </div>
             </div>
 
@@ -242,24 +289,22 @@ function DashboardMock() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[12px] font-semibold">
                   <Activity size={14} className="text-indigo-500" />
-                  KI-Aktivität
+                  KI-Extraktions-Stream
                 </div>
-                <span className="text-[10px] text-zinc-500">live</span>
+                <span className="text-[10px] text-zinc-500">live · audit-trail</span>
               </div>
               <ul className="mt-3 space-y-2.5">
-                <ActivityRow tone="rose" text="Sicherheitslücke erkannt – CNC-200" time="vor 8 Min." />
-                <ActivityRow tone="indigo" text="SOP automatisch generiert" time="vor 21 Min." />
-                <ActivityRow tone="emerald" text="Onboarding-Pfad aktualisiert" time="vor 1 Std." />
-                <ActivityRow tone="amber" text="Wissens-Cluster erkannt" time="vor 2 Std." />
+                <ActivityRow tone="rose"    text="Sicherheits­risiko erkannt · CNC-200 · §2.1" time="vor 8 Min." />
+                <ActivityRow tone="indigo"  text="SOP-CNC-200 v3.1 → v3.2 · 3 neue Schritte"   time="vor 21 Min." />
+                <ActivityRow tone="emerald" text="Erfahrungs­regel extrahiert · Späne-Farbe"     time="vor 1 Std." />
+                <ActivityRow tone="amber"   text="Anfänger­fehler dokumentiert · Hammer­schlag" time="vor 2 Std." />
               </ul>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Floating glow badges */}
-      <FloatingBadge className="left-[-2%] top-[18%]" icon={<Brain size={14} />} label="KI-Analyse aktiv" tone="indigo" />
-      <FloatingBadge className="right-[-2%] top-[58%]" icon={<ShieldCheck size={14} />} label="DSGVO-konform" tone="emerald" />
+      {/* Floating-Badges entfernt — wirkten wie Marketing-Pop-ups, nicht wie Operations-Software. */}
     </div>
   )
 }
