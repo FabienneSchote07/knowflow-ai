@@ -21,6 +21,7 @@ export default function Landing({ onEnterApp = () => {} }: LandingProps) {
     <div className="min-h-screen bg-zinc-950 text-zinc-100 antialiased selection:bg-indigo-500/40 selection:text-white">
       <Nav onEnterApp={onEnterApp} />
       <Hero onEnterApp={onEnterApp} />
+      <EuroCallout />
       <LogoStrip />
       <Problem />
       <Flow />
@@ -100,81 +101,48 @@ function Nav({ onEnterApp }: { onEnterApp: () => void }) {
 
 function Hero({ onEnterApp }: { onEnterApp: () => void }) {
   return (
-    <section id="top" className="relative overflow-hidden pt-16 pb-24 lg:pt-24 lg:pb-32">
-      {/* Aurora glows — reduziert auf 2 (Operations-Sobriety statt SaaS-Marketing-Vibe) */}
-      <div className="kf-aurora bg-indigo-700/30" style={{ top: -140, left: '14%', width: 460, height: 460 }} />
-      <div className="kf-aurora bg-rose-700/20" style={{ top: 80, right: '10%', width: 480, height: 480, animationDelay: '2s' }} />
+    <section id="top" className="relative overflow-hidden pt-24 pb-28 lg:pt-32 lg:pb-36">
+      {/* Aurora glows — auf 1 reduziert (Apple-Sobriety) */}
+      <div className="kf-aurora bg-indigo-700/25" style={{ top: -180, left: '50%', transform: 'translateX(-50%)', width: 720, height: 520 }} />
 
-      {/* Grid bg with radial mask */}
-      <div className="absolute inset-0 kf-grid-bg kf-radial-mask opacity-60 pointer-events-none" />
+      {/* Grid bg with radial mask — abgesenkt */}
+      <div className="absolute inset-0 kf-grid-bg kf-radial-mask opacity-30 pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
-        {/* Eyebrow — Palantir-Pattern: kein Pill, kein Chevron. Proof-Anchor in Tracking-Wide-Uppercase. */}
-        <div className="flex justify-center">
-          <a
-            href="#produkt"
-            className="inline-flex items-center gap-3 text-[10.5px] tracking-[0.22em] uppercase text-zinc-500 hover:text-zinc-300 transition"
-          >
-            <span className="text-zinc-600">Industrial Operations Risk Software</span>
-            <span className="h-[3px] w-[3px] rounded-full bg-zinc-700" />
-            <span>Pilot Werk Mainz-Bischofsheim</span>
-            <span className="h-[3px] w-[3px] rounded-full bg-zinc-700" />
-            <span>CNC-200-Linie · 14 Senior-Operatoren</span>
-          </a>
-        </div>
+      <div className="relative max-w-5xl mx-auto px-6 lg:px-10">
 
-        {/* Headline — Demographics → Konsequenz mit Anlagen-Vokabular und SOP-Verdikt. */}
-        <h1 className="mt-9 text-center font-semibold tracking-[-0.03em] text-[40px] leading-[1.06] sm:text-5xl lg:text-[64px] lg:leading-[1.04]">
-          <span className="text-white">34&nbsp;% Ihrer Senior-Operatoren</span>
+        {/* Headline — 2 Zeilen. Emotional. Ein Gedanke. */}
+        <h1 className="text-center font-semibold tracking-[-0.035em] text-[44px] leading-[1.04] sm:text-[64px] lg:text-[88px] lg:leading-[0.98]">
+          <span className="text-white">Bevor die Erfahrung</span>
           <br />
-          <span className="text-white">gehen bis 2030 in Rente.</span>
-          <br />
-          <span className="text-rose-300/90">Mit ihnen 30 Jahre Anlagen-Know-how.</span>{' '}
-          <span className="text-rose-300">Undokumentiert.</span>
+          <span className="text-zinc-400">in Rente geht.</span>
         </h1>
 
-        {/* Sub — kürzer, operativer, mit Ausschuss-Quote. */}
-        <p className="mt-7 max-w-2xl mx-auto text-center text-[16px] lg:text-[17px] leading-relaxed text-zinc-400">
-          Jeder Renten­eintritt kostet Ihre Linie 14&nbsp;Monate Einarbeitung, 380.000&nbsp;€ implizites Anlagen-Wissen und eine höhere Ausschuss­quote pro Schicht.
-          <br className="hidden sm:block" />
-          <span className="text-zinc-200">KnowFlow extrahiert es — als auditierte Erfahrungs­regeln in MES, SOP und QM, vor dem Abgang.</span>
+        {/* Sub — 1 Satz. 14 Wörter. Keine Fachbegriffe. */}
+        <p className="mt-8 max-w-xl mx-auto text-center text-[17px] lg:text-[19px] leading-relaxed text-zinc-400">
+          KnowFlow dokumentiert Erfahrungswissen aus Produktion, Wartung und Qualität — bevor es das Werk verlässt.
         </p>
 
-        {/* CTAs — Audit (Risk-Frame) primary, Architektur-Call (Enterprise-Vocab) sekundär. */}
-        <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
+        {/* CTA — Eine primäre Aktion. Ein Text-Link. Keine zweite Button-Wand. */}
+        <div className="mt-12 flex flex-col items-center gap-4">
           <button
             onClick={onEnterApp}
-            className="group inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-zinc-900 font-medium shadow-[0_1px_0_rgba(255,255,255,0.5)_inset] hover:shadow-[0_0_0_4px_rgba(255,255,255,0.08)] transition"
+            className="group inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white text-zinc-900 font-medium text-[15px] shadow-[0_1px_0_rgba(255,255,255,0.5)_inset] hover:shadow-[0_0_0_4px_rgba(255,255,255,0.08)] transition"
           >
-            Wissens­verlust-Audit anfordern
+            Demo ansehen
             <ArrowRight size={16} className="group-hover:translate-x-0.5 transition" />
           </button>
           <button
             onClick={onEnterApp}
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-white font-medium transition"
+            className="text-[13.5px] text-zinc-400 hover:text-white transition inline-flex items-center gap-1.5"
           >
-            <Play size={14} /> Architektur-Call · 30 Min · Solution Architect
+            <Play size={12} /> Pilotgespräch
           </button>
         </div>
+      </div>
 
-        {/* KPI strip */}
-        <HeroKpiStrip />
-
-        {/* Trust row — Pilot-Werk wandert ins Eyebrow. Hier: Architektur · Compliance · Hosting. */}
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11.5px] text-zinc-500">
-          <TrustChip icon={<Layers size={12} />} label="Operations-Schicht über MES, SAP-QM und SOP-System" />
-          <span className="text-zinc-700">•</span>
-          <TrustChip icon={<FileText size={12} />} label="Audit-Trail je Erfahrungs­regel · ISO 9001 §7.1.6" />
-          <span className="text-zinc-700">•</span>
-          <TrustChip icon={<ShieldCheck size={12} />} label="ISO 27001 · BSI C5 · DSGVO Art. 32" />
-          <span className="text-zinc-700">•</span>
-          <TrustChip icon={<Globe size={12} />} label="On-Prem oder EU-Cloud · DE-Hosting" />
-        </div>
-
-        {/* Dashboard preview */}
-        <div className="relative mt-16 lg:mt-20">
-          <DashboardMock />
-        </div>
+      {/* Dashboard preview — viel mehr Whitespace, max-w-6xl, eigener Atemraum */}
+      <div className="relative mt-24 lg:mt-32 max-w-7xl mx-auto px-6 lg:px-10">
+        <DashboardMock />
       </div>
     </section>
   )
@@ -400,6 +368,49 @@ function FloatingBadge({ className, icon, label, tone }: { className?: string; i
     <div className={`hidden lg:flex absolute z-10 ${className} kf-float-soft items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r ${bg} text-white text-[11px] font-medium shadow-xl backdrop-blur`}>
       {icon} {label}
     </div>
+  )
+}
+
+/* ------------------------------ EURO CALLOUT ------------------------------ */
+
+function EuroCallout() {
+  return (
+    <section
+      id="schaden"
+      className="relative overflow-hidden bg-zinc-950 py-32 lg:py-48 border-t border-white/[0.04]"
+    >
+      <div
+        className="absolute inset-x-0 top-[28%] mx-auto h-[460px] w-[860px] max-w-full pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse at center, rgba(244,63,94,0.10) 0%, rgba(244,63,94,0) 60%)',
+        }}
+      />
+      <div className="relative max-w-4xl mx-auto px-6 lg:px-10 text-center">
+        <div className="text-[10.5px] tracking-[0.28em] uppercase text-zinc-500">
+          Basierend auf Einarbeitung · Ausschuss · Stillstand
+        </div>
+        <div
+          className="mt-10 font-semibold tabular-nums tracking-[-0.04em] text-white"
+          style={{ fontSize: 'clamp(88px, 18vw, 196px)', lineHeight: 0.94 }}
+        >
+          Bis zu 380.000&nbsp;€
+        </div>
+        <div className="mt-7 text-[20px] lg:text-[24px] text-zinc-400 tracking-tight">
+          impliziter Wissensverlust pro Senior-Abgang.
+        </div>
+        <div className="h-24 lg:h-32" />
+        <div className="space-y-5 lg:space-y-7 text-[22px] lg:text-[28px] tracking-tight">
+          <div className="text-zinc-500">Längere Einarbeitung.</div>
+          <div className="text-zinc-500">Mehr Anfänger&shy;fehler.</div>
+          <div className="text-zinc-500">Mehr Ausschuss.</div>
+          <div className="text-zinc-200">Wissen, das niemand mehr hat.</div>
+        </div>
+        <div className="mt-24 text-[10.5px] text-zinc-700 leading-relaxed max-w-md mx-auto">
+          Schätzwert basierend auf internen Berechnungsmodellen aus Einarbeitungszeit, Qualitätsverlusten und Produktionsrisiken.
+        </div>
+      </div>
+    </section>
   )
 }
 
